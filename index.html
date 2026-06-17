@@ -20,10 +20,7 @@
       --accent-green: #3ecf8e;
       --accent-orange: #f97316;
       --accent-purple: #a78bfa;
-      --btn-active-bg: #ffffff;
-      --btn-active-text: #000000;
-      --filter-active-bg: #1e293b;
-      --filter-active-border: #6c8fff;
+      --accent-yellow: #f59e0b;
     }
 
     body {
@@ -35,304 +32,173 @@
     }
 
     /* ── HEADER ── */
-    .header {
-      padding: 28px 32px 12px;
-    }
-    .header h1 {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-    .header p {
-      color: var(--text-muted);
-      font-size: 13px;
-    }
+    .header { padding: 24px 28px 10px; display: flex; align-items: flex-start; justify-content: space-between; }
+    .header h1 { font-size: 20px; font-weight: 700; margin-bottom: 3px; }
+    .header p  { color: var(--text-muted); font-size: 12px; }
 
     /* ── FILTERS BAR ── */
     .filters-bar {
-      padding: 12px 32px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+      padding: 10px 28px;
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
       border-bottom: 1px solid var(--card-border);
     }
-
-    .date-btns {
-      display: flex;
-      gap: 4px;
-      flex-wrap: wrap;
-    }
-
     .btn-date {
-      background: transparent;
-      border: 1px solid var(--card-border);
-      color: var(--text-muted);
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      transition: all .15s;
+      background: transparent; border: 1px solid var(--card-border);
+      color: var(--text-muted); padding: 5px 11px; border-radius: 6px;
+      cursor: pointer; font-size: 12px; transition: all .15s;
     }
     .btn-date:hover { border-color: #555; color: var(--text); }
-    .btn-date.active {
-      background: var(--btn-active-bg);
-      border-color: var(--btn-active-bg);
-      color: var(--btn-active-text);
-      font-weight: 600;
-    }
-
-    .date-sep { color: var(--text-muted); padding: 0 4px; }
+    .btn-date.active { background: #fff; border-color: #fff; color: #000; font-weight: 600; }
 
     input[type="date"] {
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      color: var(--text);
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 13px;
-      cursor: pointer;
+      background: var(--card); border: 1px solid var(--card-border);
+      color: var(--text); padding: 5px 8px; border-radius: 6px; font-size: 12px; cursor: pointer;
     }
     input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: .5; }
 
-    .refresh-info {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--text-muted);
-      font-size: 12px;
-      white-space: nowrap;
-    }
-
-    .btn-refresh {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      transition: color .15s;
-    }
+    .refresh-info { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 11px; white-space: nowrap; }
+    .btn-refresh { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px; transition: color .15s; }
     .btn-refresh:hover { color: var(--text); }
 
-    /* ── FUENTE FILTER ── */
+    /* ── SOURCE BAR ── */
     .source-bar {
-      padding: 10px 32px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-bottom: 1px solid var(--card-border);
+      padding: 8px 28px; display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid var(--card-border); flex-wrap: wrap;
     }
-    .source-label {
-      color: var(--text-muted);
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .source-btns { display: flex; gap: 4px; }
+    .source-label { color: var(--text-muted); font-size: 12px; }
     .btn-source {
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--text-muted);
-      padding: 5px 14px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 13px;
-      transition: all .15s;
+      background: transparent; border: 1px solid transparent;
+      color: var(--text-muted); padding: 4px 13px; border-radius: 20px;
+      cursor: pointer; font-size: 12px; transition: all .15s;
     }
     .btn-source:hover { color: var(--text); }
-    .btn-source.active {
-      background: var(--filter-active-bg);
-      border-color: var(--filter-active-border);
-      color: var(--text);
-    }
+    .btn-source.active { background: #1e293b; border-color: var(--accent-blue); color: var(--text); }
 
     /* ── CAMPAIGN BAR ── */
     .campaign-bar {
-      padding: 10px 32px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      border-bottom: 1px solid var(--card-border);
-      flex-wrap: wrap;
+      padding: 8px 28px; display: flex; align-items: center; gap: 14px;
+      border-bottom: 1px solid var(--card-border); flex-wrap: wrap;
     }
-    .camp-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .camp-label {
-      color: var(--text-muted);
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
+    .camp-group { display: flex; align-items: center; gap: 7px; }
+    .camp-label { color: var(--text-muted); font-size: 12px; }
     select {
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      color: var(--text);
-      padding: 6px 30px 6px 10px;
-      border-radius: 6px;
-      font-size: 13px;
-      cursor: pointer;
+      background: var(--card); border: 1px solid var(--card-border); color: var(--text);
+      padding: 5px 28px 5px 9px; border-radius: 6px; font-size: 12px; cursor: pointer;
       appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 10px center;
-      min-width: 200px;
+      background-repeat: no-repeat; background-position: right 9px center; min-width: 180px;
     }
 
     /* ── KPI GRID ── */
-    .kpi-section { padding: 20px 32px 0; }
-
+    .kpi-section { padding: 16px 28px 0; }
     .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+      gap: 8px;
     }
-
     .kpi-card {
+      background: var(--card); border: 1px solid var(--card-border);
+      border-radius: 10px; padding: 14px; min-height: 82px;
+    }
+    .kpi-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .kpi-label { font-size: 10px; font-weight: 600; color: var(--text-label); letter-spacing: .4px; text-transform: uppercase; line-height: 1.3; }
+    .kpi-icon  { color: var(--text-muted); font-size: 13px; }
+    .kpi-value { font-size: 24px; font-weight: 700; line-height: 1; }
+    .color-white  { color: var(--text); }
+    .color-blue   { color: var(--accent-blue); }
+    .color-green  { color: var(--accent-green); }
+    .color-orange { color: var(--accent-orange); }
+    .color-yellow { color: var(--accent-yellow); }
+
+    /* ── CAMPAIGN TABLE ── */
+    .table-section { padding: 20px 28px 28px; }
+    .table-title { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; }
+    .table-title span { color: var(--text); }
+    .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--card-border); }
+
+    table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
       background: var(--card);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 16px;
-      min-height: 90px;
-      position: relative;
     }
+    thead th {
+      background: #111; color: var(--text-muted); font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .4px;
+      padding: 11px 14px; text-align: right; border-bottom: 1px solid var(--card-border);
+      white-space: nowrap; cursor: pointer; user-select: none;
+    }
+    thead th:first-child { text-align: left; }
+    thead th.sort-asc::after  { content: ' ↑'; color: var(--accent-blue); }
+    thead th.sort-desc::after { content: ' ↓'; color: var(--accent-blue); }
 
-    .kpi-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 10px;
-    }
-    .kpi-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-label);
-      letter-spacing: .5px;
-      text-transform: uppercase;
-      line-height: 1.3;
-    }
-    .kpi-icon { color: var(--text-muted); font-size: 14px; }
+    tbody tr { border-bottom: 1px solid #1e1e1e; transition: background .1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #222; }
+    tbody tr.total-row { background: #151515; border-top: 2px solid var(--card-border); font-weight: 700; }
 
-    .kpi-value {
-      font-size: 26px;
-      font-weight: 700;
-      line-height: 1;
-    }
-    .kpi-value.color-white { color: var(--text); }
-    .kpi-value.color-blue  { color: var(--accent-blue); }
-    .kpi-value.color-green { color: var(--accent-green); }
-    .kpi-value.color-orange{ color: var(--accent-orange); }
+    td { padding: 10px 14px; text-align: right; white-space: nowrap; }
+    td:first-child { text-align: left; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    td.val-white  { color: var(--text); }
+    td.val-blue   { color: var(--accent-blue); }
+    td.val-green  { color: var(--accent-green); }
+    td.val-orange { color: var(--accent-orange); }
+    td.val-yellow { color: var(--accent-yellow); }
+    td.val-neg    { color: #f87171; }
+    td.camp-name  { color: var(--text); }
 
     /* ── CHARTS ── */
     .charts-section {
-      padding: 20px 32px 32px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      padding: 0 28px 20px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
     }
-    @media (max-width: 900px) {
-      .charts-section { grid-template-columns: 1fr; }
-    }
-
-    .chart-card {
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 20px;
-    }
-    .chart-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-    }
+    @media (max-width: 900px) { .charts-section { grid-template-columns: 1fr; } }
+    .chart-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 10px; padding: 18px; }
+    .chart-title { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 14px; }
     .chart-title span { color: var(--text); }
-    .chart-title .dot {
-      display: inline-block;
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--text-muted);
-      margin: 0 6px;
-      vertical-align: middle;
-    }
-    canvas { width: 100% !important; }
 
     /* ── LOADING ── */
     .loading-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.85);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 16px; z-index: 100;
+      position: fixed; inset: 0; background: rgba(0,0,0,.88);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 14px; z-index: 100;
     }
-    .spinner {
-      width: 36px; height: 36px;
-      border: 3px solid #333;
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-    }
+    .spinner { width: 34px; height: 34px; border: 3px solid #333; border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text { color: #aaa; font-size: 14px; }
+    .loading-text { color: #aaa; font-size: 13px; }
 
-    /* ── ERROR ── */
     .error-banner {
-      background: #3b1515; border: 1px solid #7f1d1d;
-      border-radius: 8px; padding: 12px 16px;
-      margin: 16px 32px; color: #fca5a5; font-size: 13px;
-      display: none;
+      background: #3b1515; border: 1px solid #7f1d1d; border-radius: 8px;
+      padding: 11px 15px; margin: 12px 28px; color: #fca5a5; font-size: 12px; display: none;
     }
-
-    /* ── CHART LEGEND ── */
-    .chart-legend {
-      display: flex; gap: 16px; margin-top: 10px;
-    }
-    .legend-item {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 12px; color: var(--text-muted);
-    }
-    .legend-dot {
-      width: 10px; height: 10px; border-radius: 2px;
-    }
-
-    /* ── NOTA ── */
     .nota-leads {
-      margin: 0 32px 10px;
-      background: #1c1f2e; border: 1px solid #334;
-      border-radius: 8px; padding: 10px 14px;
-      color: #8899cc; font-size: 12px; display: none;
+      margin: 8px 28px; background: #1c1f2e; border: 1px solid #334;
+      border-radius: 8px; padding: 9px 13px; color: #8899cc; font-size: 12px; display: none;
     }
+    .chart-legend { display: flex; gap: 14px; margin-top: 8px; }
+    .legend-item  { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); }
+    .legend-dot   { width: 9px; height: 9px; border-radius: 2px; }
   </style>
 </head>
 <body>
 
-<!-- Loading -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
   <div class="loading-text">Cargando datos desde Google Sheets…</div>
 </div>
 
-<!-- Error -->
 <div class="error-banner" id="errorBanner"></div>
 
 <!-- Header -->
 <div class="header">
-  <h1>Dashboard de performance</h1>
-  <p>Métricas de inversión, agendas y ventas en tiempo real desde Google Sheets.</p>
+  <div>
+    <h1>Dashboard de performance</h1>
+    <p>Métricas de inversión, agendas y ventas en tiempo real desde Google Sheets.</p>
+  </div>
 </div>
 
 <!-- Date filters -->
 <div class="filters-bar">
-  <div class="date-btns">
+  <div style="display:flex;gap:4px;flex-wrap:wrap">
     <button class="btn-date active" data-range="all">Todo</button>
     <button class="btn-date" data-range="today">Hoy</button>
     <button class="btn-date" data-range="yesterday">Ayer</button>
@@ -343,7 +209,7 @@
     <button class="btn-date" data-range="lastMonth">Mes anterior</button>
   </div>
   <input type="date" id="dateFrom" title="Desde" />
-  <span class="date-sep">→</span>
+  <span style="color:var(--text-muted)">→</span>
   <input type="date" id="dateTo" title="Hasta" />
   <div class="refresh-info">
     <span id="lastUpdate">—</span>
@@ -351,149 +217,151 @@
   </div>
 </div>
 
-<!-- Fuente filter -->
+<!-- Fuente -->
 <div class="source-bar">
   <span class="source-label">🔍 Fuente:</span>
-  <div class="source-btns">
-    <button class="btn-source active" data-source="all">Todas</button>
-    <button class="btn-source" data-source="ads">Ads</button>
-    <button class="btn-source" data-source="setting">Setting</button>
-    <button class="btn-source" data-source="referidos">Referidos</button>
-    <button class="btn-source" data-source="direct">Direct</button>
-  </div>
+  <button class="btn-source active" data-source="all">Todas</button>
+  <button class="btn-source" data-source="ads">Ads</button>
+  <button class="btn-source" data-source="setting">Setting</button>
+  <button class="btn-source" data-source="referidos">Referidos</button>
+  <button class="btn-source" data-source="direct">Direct</button>
 </div>
 
-<!-- Campaign / Ad filters -->
+<!-- Campaña / Anuncio -->
 <div class="campaign-bar">
   <div class="camp-group">
     <span class="camp-label">📢 Campaña:</span>
-    <select id="selCampaign">
-      <option value="all">Todas</option>
-    </select>
+    <select id="selCampaign"><option value="all">Todas</option></select>
   </div>
   <div class="camp-group">
     <span class="camp-label">🏷️ Anuncio:</span>
-    <select id="selAd">
-      <option value="all">Todos</option>
-    </select>
+    <select id="selAd"><option value="all">Todos</option></select>
   </div>
 </div>
 
-<!-- Nota si no hay fecha en leads -->
 <div class="nota-leads" id="notaLeads">
-  ℹ️ La pestaña <b>leads</b> no tiene columna <b>Fecha</b>. Se muestran todos los leads sin filtro de fecha. Para habilitar el filtro, agrega una columna "Fecha" en esa pestaña.
+  ℹ️ La pestaña <b>leads</b> no tiene columna <b>Fecha</b>. Para filtrar agendas por fecha, agrega esa columna en el Sheet.
 </div>
 
 <!-- KPI Cards -->
 <div class="kpi-section">
-  <div class="kpi-grid" id="kpiGrid">
-    <!-- Row 1 -->
-    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Agendas</span><span class="kpi-icon">📅</span></div><div class="kpi-value color-white" id="kpi-agendas">—</div></div>
-    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Agendas Calif.</span><span class="kpi-icon">⊙</span></div><div class="kpi-value color-blue" id="kpi-agendas-calif">—</div></div>
-    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">% Calidad</span><span class="kpi-icon">✓</span></div><div class="kpi-value color-blue" id="kpi-calidad">—</div></div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Leads / Agendas</span><span class="kpi-icon">📋</span></div><div class="kpi-value color-white" id="kpi-agendas">—</div></div>
     <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Inversión</span><span class="kpi-icon">$</span></div><div class="kpi-value color-white" id="kpi-inversion">—</div></div>
-    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Costo x Agenda</span><span class="kpi-icon">⊙</span></div><div class="kpi-value color-white" id="kpi-costo-agenda">—</div></div>
-    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Costo / Agenda Calif.</span><span class="kpi-icon">⊙</span></div><div class="kpi-value color-blue" id="kpi-costo-calif">—</div></div>
+    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">CPL</span><span class="kpi-icon">⊙</span></div><div class="kpi-value color-white" id="kpi-cpl">—</div></div>
     <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Ventas</span><span class="kpi-icon">🛒</span></div><div class="kpi-value color-white" id="kpi-ventas">—</div></div>
-    <!-- Row 2 -->
     <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">% Conv.</span><span class="kpi-icon">%</span></div><div class="kpi-value color-blue" id="kpi-conv">—</div></div>
-    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Agendas / Venta</span><span class="kpi-icon">👤</span></div><div class="kpi-value color-white" id="kpi-ag-venta">—</div></div>
+    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Leads x Venta</span><span class="kpi-icon">👤</span></div><div class="kpi-value color-white" id="kpi-lxv">—</div></div>
     <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">CAC</span><span class="kpi-icon">⊙</span></div><div class="kpi-value color-white" id="kpi-cac">—</div></div>
-    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Cash</span><span class="kpi-icon">📋</span></div><div class="kpi-value color-green" id="kpi-cash">—</div></div>
-    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Facturación</span><span class="kpi-icon">🧾</span></div><div class="kpi-value color-green" id="kpi-facturacion">—</div></div>
-    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Beneficio Cash</span><span class="kpi-icon">↩</span></div><div class="kpi-value color-green" id="kpi-ben-cash">—</div></div>
-    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Beneficio Revenue</span><span class="kpi-icon">↩</span></div><div class="kpi-value color-green" id="kpi-ben-rev">—</div></div>
-    <!-- Row 3 -->
-    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">ROAS Cash</span><span class="kpi-icon">↗</span></div><div class="kpi-value color-green" id="kpi-roas-cash">—</div></div>
-    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">ROAS Revenue</span><span class="kpi-icon">↗</span></div><div class="kpi-value color-green" id="kpi-roas-rev">—</div></div>
-    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Periodo</span><span class="kpi-icon">📅</span></div><div class="kpi-value color-white" style="font-size:18px" id="kpi-periodo">—</div></div>
+    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Cash</span><span class="kpi-icon">💰</span></div><div class="kpi-value color-green" id="kpi-cash">—</div></div>
+    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Facturación</span><span class="kpi-icon">🧾</span></div><div class="kpi-value color-green" id="kpi-fact">—</div></div>
+    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Beneficio Cash</span><span class="kpi-icon">↗</span></div><div class="kpi-value color-green" id="kpi-bcash">—</div></div>
+    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Beneficio Revenue</span><span class="kpi-icon">↗</span></div><div class="kpi-value color-green" id="kpi-brev">—</div></div>
+    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">ROAS Cash</span><span class="kpi-icon">↗</span></div><div class="kpi-value color-yellow" id="kpi-roas-cash">—</div></div>
+    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">ROAS Revenue</span><span class="kpi-icon">↗</span></div><div class="kpi-value color-yellow" id="kpi-roas-rev">—</div></div>
+    <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Periodo</span><span class="kpi-icon">📅</span></div><div class="kpi-value color-white" style="font-size:16px" id="kpi-periodo">—</div></div>
   </div>
 </div>
 
 <!-- Charts -->
-<div class="charts-section">
+<div class="charts-section" style="margin-top:20px">
   <div class="chart-card">
     <div class="chart-title"><span>Inversión por fecha</span></div>
-    <canvas id="chartInversion" height="220"></canvas>
+    <canvas id="chartInversion" height="200"></canvas>
   </div>
   <div class="chart-card">
-    <div class="chart-title">
-      <span>Agendas por fecha</span><span class="dot"></span><span>Costo por agenda</span>
-    </div>
-    <canvas id="chartAgendas" height="220"></canvas>
+    <div class="chart-title"><span>Leads por fecha</span> · <span>CPL</span></div>
+    <canvas id="chartLeads" height="200"></canvas>
     <div class="chart-legend">
-      <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Agendas</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#f97316;border-radius:50%"></div>Costo / agenda</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Leads</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f97316;border-radius:50%"></div>CPL</div>
     </div>
   </div>
 </div>
 
+<!-- Tabla por campaña -->
+<div class="table-section">
+  <div class="table-title"><span>Desglose por Campaña</span></div>
+  <div class="table-wrap">
+    <table id="campTable">
+      <thead>
+        <tr>
+          <th data-col="camp">Campaña</th>
+          <th data-col="leads">Leads</th>
+          <th data-col="inversion">Inversión</th>
+          <th data-col="cpl">CPL</th>
+          <th data-col="ventas">Ventas</th>
+          <th data-col="conv">% Conv.</th>
+          <th data-col="lxv">Leads x Venta</th>
+          <th data-col="cac">CAC</th>
+          <th data-col="cash">Cash</th>
+          <th data-col="fact">Fact</th>
+          <th data-col="bcash">Beneficio Cash</th>
+          <th data-col="brev">Beneficio Revenue</th>
+          <th data-col="roasCash">ROAS Cash</th>
+          <th data-col="roasRev">ROAS Revenue</th>
+        </tr>
+      </thead>
+      <tbody id="campTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
 <script>
-// ── CONFIG ──────────────────────────────────────────────────────────────────
+// ── CONFIG ──────────────────────────────────────────────────────────────
 const SHEET_ID = '1H1Kar_vQ4zfEN7Om2YdFyaozx6gWQHd4EGFt3mUEEFw';
 const BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=`;
 
-// Mapeo de utm_source → grupo de fuente
 const SOURCE_MAP = {
   ads:       ['fb', 'ig', 'facebook', 'instagram', 'meta'],
   setting:   ['setting', 'ig_bio', 'linktree'],
   referidos: ['referidos', 'referral', 'ref'],
-  direct:    ['direct', '', null, undefined],
+  direct:    ['direct', ''],
 };
 
-// ── STATE ────────────────────────────────────────────────────────────────────
-let rawLeads       = [];
-let rawCompradores = [];
-let rawMeta        = [];
-let activeRange    = 'all';
-let activeSource   = 'all';
-let activeCampaign = 'all';
-let activeAd       = 'all';
-let dateFrom       = null;
-let dateTo         = null;
-let leadsHasDate   = false;
+// ── STATE ──────────────────────────────────────────────────────────────
+let rawLeads = [], rawCompradores = [], rawMeta = [];
+let activeRange = 'all', activeSource = 'all';
+let activeCampaign = 'all', activeAd = 'all';
+let dateFrom = null, dateTo = null;
+let leadsHasDate = false;
+let sortCol = 'leads', sortDir = 'desc';
+let chartInvInst = null, chartLeadsInst = null;
 
-let chartInversionInst = null;
-let chartAgendasInst   = null;
+// ── UTILS ──────────────────────────────────────────────────────────────
+function normStr(s) { return (s || '').replace(/\\\//g, '/').trim(); }
+function isTemplate(s) { return /^\{\{.*\}\}$/.test((s || '').trim()); }
 
-// ── UTILS ────────────────────────────────────────────────────────────────────
 function parseNum(val) {
-  if (val == null || val === '') return 0;
-  const s = String(val).replace(/[$,\s]/g, '').replace('.', '').replace(',', '.');
-  // handle ARS format: 63.112 → 63112
+  if (!val && val !== 0) return 0;
   const n = parseFloat(String(val).replace(/[$\s]/g, '').replace(/\./g, '').replace(',', '.'));
   return isNaN(n) ? 0 : n;
 }
 
 function parseDate(val) {
   if (!val || val === '') return null;
-  // try DD/MM/YYYY, YYYY-MM-DD, MM/DD/YYYY
   let d;
   if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(val)) {
     const [p1, p2, p3] = val.split('/');
-    // detect if it's DD/MM or MM/DD by context (prefer DD/MM for Spanish)
     d = new Date(`${p3}-${p2.padStart(2,'0')}-${p1.padStart(2,'0')}`);
   } else if (/^\d{4}-\d{2}-\d{2}/.test(val)) {
     d = new Date(val.substring(0, 10));
-  } else {
-    d = new Date(val);
-  }
+  } else { d = new Date(val); }
   return isNaN(d.getTime()) ? null : d;
 }
 
-function fmtCurrency(n) {
-  if (isNaN(n) || n === null) return '—';
+function fmtC(n) {
+  if (n == null || isNaN(n)) return '—';
   return '$' + Math.round(n).toLocaleString('es-AR');
 }
-
-function fmtNum(n, dec = 0) {
-  if (isNaN(n) || n === null) return '—';
+function fmtN(n, dec = 0) {
+  if (n == null || isNaN(n)) return '—';
   return n.toLocaleString('es-AR', { minimumFractionDigits: dec, maximumFractionDigits: dec });
 }
+function fmtPct(n) { return n == null || isNaN(n) ? '—' : fmtN(n, 1) + '%'; }
+function fmtX(n)   { return n == null || isNaN(n) || !isFinite(n) ? '—' : fmtN(n, 2) + 'x'; }
 
-function today() {
-  const d = new Date(); d.setHours(0,0,0,0); return d;
-}
+function today() { const d = new Date(); d.setHours(0,0,0,0); return d; }
 
 function getDateRange(range) {
   const t = today();
@@ -505,7 +373,7 @@ function getDateRange(range) {
     case '30d':       { const s = new Date(t); s.setDate(s.getDate()-29); return [s,t]; }
     case 'thisMonth': { const s = new Date(t.getFullYear(), t.getMonth(), 1); const e = new Date(t.getFullYear(), t.getMonth()+1, 0); return [s,e]; }
     case 'lastMonth': { const s = new Date(t.getFullYear(), t.getMonth()-1, 1); const e = new Date(t.getFullYear(), t.getMonth(), 0); return [s,e]; }
-    default:          return [null, null];
+    default: return [null, null];
   }
 }
 
@@ -519,72 +387,28 @@ function inRange(date, from, to) {
 
 function getSourceGroup(src) {
   const s = (src || '').toLowerCase().trim();
-  for (const [group, vals] of Object.entries(SOURCE_MAP)) {
-    if (vals.includes(s)) return group;
-  }
+  for (const [g, vals] of Object.entries(SOURCE_MAP)) { if (vals.includes(s)) return g; }
   if (!s) return 'direct';
-  return 'ads'; // default unknown to ads
+  return 'ads';
 }
 
-// ── FETCH ────────────────────────────────────────────────────────────────────
+// ── FETCH ──────────────────────────────────────────────────────────────
 async function fetchSheet(name) {
-  const url = BASE_URL + encodeURIComponent(name);
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`No se pudo cargar la pestaña "${name}" (${res.status})`);
-  const text = await res.text();
-  const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
-  return parsed.data;
+  const res = await fetch(BASE_URL + encodeURIComponent(name));
+  if (!res.ok) throw new Error(`No se pudo cargar "${name}" (${res.status})`);
+  return Papa.parse(await res.text(), { header: true, skipEmptyLines: true }).data;
 }
 
-// ── POPULATE SELECTS ──────────────────────────────────────────────────────────
-function normStr(s) {
-  return (s || '').replace(/\\\//g, '/').trim();
-}
-function isTemplate(s) {
-  return /^\{\{.*\}\}$/.test((s || '').trim());
+// ── FILTER ──────────────────────────────────────────────────────────────
+function getRange() {
+  return activeRange === 'custom' ? [dateFrom, dateTo] : getDateRange(activeRange);
 }
 
-function populateSelects() {
-  const campaigns = [...new Set([
-    ...rawLeads.map(r => normStr(r['utm_campaign'])),
-    ...rawMeta.map(r => normStr(r['Nombre de la campaña'])),
-  ])].filter(v => v && !isTemplate(v)).sort();
-
-  const selC = document.getElementById('selCampaign');
-  selC.innerHTML = '<option value="all">Todas (' + campaigns.length + ')</option>';
-  campaigns.forEach(c => {
-    const o = document.createElement('option');
-    o.value = c; o.textContent = c.length > 60 ? c.substring(0,57)+'…' : c;
-    selC.appendChild(o);
-  });
-
-  const ads = [...new Set([
-    ...rawLeads.map(r => normStr(r['utm_term'])),
-    ...rawMeta.map(r => normStr(r['Nombre del anuncio'])),
-  ])].filter(v => v && !isTemplate(v)).sort();
-
-  const selA = document.getElementById('selAd');
-  selA.innerHTML = '<option value="all">Todos (' + ads.length + ')</option>';
-  ads.forEach(a => {
-    const o = document.createElement('option');
-    o.value = a; o.textContent = a.length > 60 ? a.substring(0,57)+'…' : a;
-    selA.appendChild(o);
-  });
-}
-
-// ── FILTER DATA ───────────────────────────────────────────────────────────────
 function filterLeads(from, to) {
   return rawLeads.filter(r => {
-    // fuente
-    if (activeSource !== 'all') {
-      const group = getSourceGroup(r['utm_source']);
-      if (group !== activeSource) return false;
-    }
-    // campaña
+    if (activeSource !== 'all' && getSourceGroup(r['utm_source']) !== activeSource) return false;
     if (activeCampaign !== 'all' && normStr(r['utm_campaign']) !== activeCampaign) return false;
-    // anuncio
     if (activeAd !== 'all' && normStr(r['utm_term']) !== activeAd) return false;
-    // fecha
     if (leadsHasDate && (from || to)) {
       const d = parseDate(r['Fecha'] || r['fecha']);
       if (!inRange(d, from, to)) return false;
@@ -595,22 +419,15 @@ function filterLeads(from, to) {
 
 function filterCompradores(from, to) {
   return rawCompradores.filter(r => {
-    // fuente
-    if (activeSource !== 'all') {
-      const group = getSourceGroup(r['FUENTE'] || r['utm_source']);
-      if (group !== activeSource) return false;
-    }
-    // campaña
+    if (activeSource !== 'all' && getSourceGroup(r['FUENTE']) !== activeSource) return false;
     if (activeCampaign !== 'all') {
-      const camp = normStr(r['CAMPANA'] || r['utm_campaign'] || '');
-      if (!camp.includes(activeCampaign) && camp !== activeCampaign) return false;
+      const c = normStr(r['CAMPANA'] || '');
+      if (!c.includes(activeCampaign) && c !== activeCampaign) return false;
     }
-    // anuncio
     if (activeAd !== 'all') {
-      const ad = normStr(r['AD'] || r['utm_term'] || '');
-      if (!ad.includes(activeAd) && ad !== activeAd) return false;
+      const a = normStr(r['AD'] || '');
+      if (!a.includes(activeAd) && a !== activeAd) return false;
     }
-    // fecha
     if (from || to) {
       const d = parseDate(r['Fecha'] || r['fecha']);
       if (!inRange(d, from, to)) return false;
@@ -621,266 +438,323 @@ function filterCompradores(from, to) {
 
 function filterMeta(from, to) {
   return rawMeta.filter(r => {
-    // campaña
-    const campCol = normStr(r['Nombre de la campaña'] || '');
-    if (activeCampaign !== 'all' && campCol !== activeCampaign) return false;
-    const adCol = normStr(r['Nombre del anuncio'] || '');
-    if (activeAd !== 'all' && adCol !== activeAd) return false;
-    // fecha
+    if (activeCampaign !== 'all' && normStr(r['Nombre de la campaña']) !== activeCampaign) return false;
+    if (activeAd !== 'all' && normStr(r['Nombre del anuncio']) !== activeAd) return false;
     if (from || to) {
       const start = parseDate(r['Inicio del informe']);
       const end   = parseDate(r['Fin del informe']);
-      if (!start && !end) return true;
-      // overlap: meta row overlaps with filter range
-      const rowFrom = start || end;
-      const rowTo   = end   || start;
-      if (to && rowFrom > to)   return false;
-      if (from && rowTo < from) return false;
+      const rowFrom = start || end, rowTo = end || start;
+      if (rowFrom && to   && rowFrom > to)   return false;
+      if (rowTo   && from && rowTo   < from) return false;
     }
     return true;
   });
 }
 
-// ── COMPUTE KPIs ──────────────────────────────────────────────────────────────
-function compute() {
-  const [from, to] = activeRange === 'custom'
-    ? [dateFrom, dateTo]
-    : getDateRange(activeRange);
+// ── CAMPAIGN BREAKDOWN ──────────────────────────────────────────────────
+function buildCampaignRows(leads, compradores, meta) {
+  // group leads by campaign
+  const leadsByCamp = {};
+  leads.forEach(r => {
+    const c = normStr(r['utm_campaign']) || 'Desconocido';
+    if (!leadsByCamp[c]) leadsByCamp[c] = 0;
+    leadsByCamp[c]++;
+  });
 
-  const leads    = filterLeads(from, to);
-  const compradores = filterCompradores(from, to);
-  const meta     = filterMeta(from, to);
+  // group compradores by campaign
+  const compByCamp = {};
+  compradores.forEach(r => {
+    const c = normStr(r['CAMPANA'] || r['utm_campaign'] || '') || 'Desconocido';
+    if (!compByCamp[c]) compByCamp[c] = { ventas: 0, cash: 0, fact: 0 };
+    compByCamp[c].ventas++;
+    compByCamp[c].cash += parseNum(r['Neto'] || 0);
+    compByCamp[c].fact += parseNum(r['Facturación Bruta'] || 0);
+  });
 
-  const agendas       = leads.length;
-  const agendasCalif  = leads.filter(r => {
-    const v = (r['Calificado'] || r['calificado'] || '').toLowerCase();
-    return v === 'si' || v === 'sí' || v === 'yes' || v === '1' || v === 'true';
-  }).length;
-  const hasCalif = rawLeads.some(r => r['Calificado'] || r['calificado']);
-  const agendasCalifDisplay = hasCalif ? agendasCalif : null;
+  // group meta by campaign
+  const metaByCamp = {};
+  meta.forEach(r => {
+    const c = normStr(r['Nombre de la campaña'] || '') || 'Desconocido';
+    if (!metaByCamp[c]) metaByCamp[c] = 0;
+    metaByCamp[c] += parseNum(r['Importe gastado (ARS)'] || r['Importe gastado'] || 0);
+  });
 
-  const ventas      = compradores.length;
-  const inversion   = meta.reduce((s, r) => s + parseNum(r['Importe gastado (ARS)'] || r['Importe gastado'] || 0), 0);
-  const cash        = compradores.reduce((s, r) => s + parseNum(r['Neto'] || 0), 0);
-  const facturacion = compradores.reduce((s, r) => s + parseNum(r['Facturación Bruta'] || r['Facturación Bruta'] || 0), 0);
+  const allCamps = [...new Set([
+    ...Object.keys(leadsByCamp),
+    ...Object.keys(compByCamp),
+    ...Object.keys(metaByCamp),
+  ])].filter(c => !isTemplate(c));
 
-  const costoXAgenda = agendas > 0 ? inversion / agendas : 0;
-  const costoCalif   = agendasCalifDisplay > 0 ? inversion / agendasCalifDisplay : 0;
-  const pctCalidad   = agendas > 0 && agendasCalifDisplay !== null ? (agendasCalifDisplay / agendas * 100) : null;
-  const pctConv      = agendas > 0 ? (ventas / agendas * 100) : 0;
-  const agXVenta     = ventas > 0 ? agendas / ventas : 0;
-  const cac          = ventas > 0 ? inversion / ventas : 0;
-  const benCash      = cash - inversion;
-  const benRev       = facturacion - inversion;
-  const roasCash     = inversion > 0 ? cash / inversion : 0;
-  const roasRev      = inversion > 0 ? facturacion / inversion : 0;
+  return allCamps.map(camp => {
+    const l  = leadsByCamp[camp]  || 0;
+    const cv = compByCamp[camp]   || { ventas: 0, cash: 0, fact: 0 };
+    const inv = metaByCamp[camp]  || 0;
+
+    // try to match partial campaign names between meta and leads
+    // Meta campaigns may include the full name, leads utm_campaign too
+    const cpl      = l > 0 && inv > 0 ? inv / l : null;
+    const conv     = l > 0 ? (cv.ventas / l * 100) : null;
+    const lxv      = cv.ventas > 0 ? l / cv.ventas : null;
+    const cac      = cv.ventas > 0 && inv > 0 ? inv / cv.ventas : null;
+    const bcash    = cv.cash - inv;
+    const brev     = cv.fact - inv;
+    const roasCash = inv > 0 ? cv.cash / inv : null;
+    const roasRev  = inv > 0 ? cv.fact / inv : null;
+
+    return { camp, leads: l, inversion: inv, cpl, ventas: cv.ventas, conv, lxv, cac,
+             cash: cv.cash, fact: cv.fact, bcash, brev, roasCash, roasRev };
+  });
+}
+
+// ── POPULATE SELECTS ──────────────────────────────────────────────────────
+function populateSelects() {
+  const camps = [...new Set([
+    ...rawLeads.map(r => normStr(r['utm_campaign'])),
+    ...rawMeta.map(r => normStr(r['Nombre de la campaña'])),
+  ])].filter(v => v && !isTemplate(v)).sort();
+
+  const selC = document.getElementById('selCampaign');
+  selC.innerHTML = `<option value="all">Todas (${camps.length})</option>`;
+  camps.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c.length > 55 ? c.slice(0,52)+'…' : c; selC.appendChild(o); });
+
+  const ads = [...new Set([
+    ...rawLeads.map(r => normStr(r['utm_term'])),
+    ...rawMeta.map(r => normStr(r['Nombre del anuncio'])),
+  ])].filter(v => v && !isTemplate(v)).sort();
+
+  const selA = document.getElementById('selAd');
+  selA.innerHTML = `<option value="all">Todos (${ads.length})</option>`;
+  ads.forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = a.length > 55 ? a.slice(0,52)+'…' : a; selA.appendChild(o); });
+}
+
+// ── COMPUTE & RENDER ────────────────────────────────────────────────────
+function render() {
+  const [from, to] = getRange();
+  const leads      = filterLeads(from, to);
+  const comp       = filterCompradores(from, to);
+  const meta       = filterMeta(from, to);
+
+  const totalLeads = leads.length;
+  const totalVentas = comp.length;
+  const totalInv  = meta.reduce((s, r) => s + parseNum(r['Importe gastado (ARS)'] || r['Importe gastado'] || 0), 0);
+  const totalCash = comp.reduce((s, r) => s + parseNum(r['Neto'] || 0), 0);
+  const totalFact = comp.reduce((s, r) => s + parseNum(r['Facturación Bruta'] || 0), 0);
+
+  const cpl      = totalLeads > 0 && totalInv > 0 ? totalInv / totalLeads : null;
+  const conv     = totalLeads > 0 ? totalVentas / totalLeads * 100 : null;
+  const lxv      = totalVentas > 0 ? totalLeads / totalVentas : null;
+  const cac      = totalVentas > 0 && totalInv > 0 ? totalInv / totalVentas : null;
+  const bcash    = totalCash - totalInv;
+  const brev     = totalFact - totalInv;
+  const roasCash = totalInv > 0 ? totalCash / totalInv : null;
+  const roasRev  = totalInv > 0 ? totalFact / totalInv : null;
 
   // Period label
-  let periodoLabel = 'Todos';
-  if (activeRange !== 'all') {
-    if (from && to) {
-      const fmt = d => d.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'2-digit' });
-      periodoLabel = from.getTime() === to.getTime() ? fmt(from) : `${fmt(from)} – ${fmt(to)}`;
-    }
+  let periodo = 'Todos';
+  if (activeRange !== 'all' && from) {
+    const fmt = d => d.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'2-digit' });
+    periodo = (from && to && from.getTime() !== to.getTime()) ? `${fmt(from)} – ${fmt(to)}` : fmt(from || to);
   }
 
-  return {
-    agendas, agendasCalifDisplay, pctCalidad,
-    inversion, costoXAgenda, costoCalif,
-    ventas, pctConv, agXVenta, cac,
-    cash, facturacion, benCash, benRev,
-    roasCash, roasRev, periodoLabel,
-    leads, compradores, meta, from, to
-  };
+  // KPI cards
+  const s = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  s('kpi-agendas', fmtN(totalLeads));
+  s('kpi-inversion', fmtC(totalInv));
+  s('kpi-cpl', fmtC(cpl));
+  s('kpi-ventas', fmtN(totalVentas));
+  s('kpi-conv', fmtPct(conv));
+  s('kpi-lxv', lxv != null ? fmtN(lxv, 2) : '—');
+  s('kpi-cac', fmtC(cac));
+  s('kpi-cash', fmtC(totalCash));
+  s('kpi-fact', fmtC(totalFact));
+  s('kpi-bcash', fmtC(bcash));
+  s('kpi-brev', fmtC(brev));
+  s('kpi-roas-cash', fmtX(roasCash));
+  s('kpi-roas-rev', fmtX(roasRev));
+  s('kpi-periodo', periodo);
+
+  // Campaign table
+  const rows = buildCampaignRows(leads, comp, meta);
+  renderTable(rows, totalLeads, totalVentas, totalInv, totalCash, totalFact);
+
+  // Charts
+  updateCharts(meta, leads);
 }
 
-// ── UPDATE UI ─────────────────────────────────────────────────────────────────
-function setText(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = val;
-}
+// ── TABLE RENDER ────────────────────────────────────────────────────────
+let tableRows = [];
 
-function render() {
-  const m = compute();
+function renderTable(rows, tL, tV, tInv, tCash, tFact) {
+  tableRows = rows;
 
-  setText('kpi-agendas',    fmtNum(m.agendas));
-  setText('kpi-agendas-calif', m.agendasCalifDisplay !== null ? fmtNum(m.agendasCalifDisplay) : 'N/A');
-  setText('kpi-calidad',    m.pctCalidad !== null ? fmtNum(m.pctCalidad, 1) + '%' : 'N/A');
-  setText('kpi-inversion',  fmtCurrency(m.inversion));
-  setText('kpi-costo-agenda', fmtCurrency(m.costoXAgenda));
-  setText('kpi-costo-calif',  m.agendasCalifDisplay !== null && m.agendasCalifDisplay > 0 ? fmtCurrency(m.costoCalif) : 'N/A');
-  setText('kpi-ventas',     fmtNum(m.ventas));
-  setText('kpi-conv',       fmtNum(m.pctConv, 1) + '%');
-  setText('kpi-ag-venta',   m.ventas > 0 ? fmtNum(m.agXVenta, 2) : '—');
-  setText('kpi-cac',        m.ventas > 0 ? fmtCurrency(m.cac) : '—');
-  setText('kpi-cash',       fmtCurrency(m.cash));
-  setText('kpi-facturacion',fmtCurrency(m.facturacion));
-  setText('kpi-ben-cash',   fmtCurrency(m.benCash));
-  setText('kpi-ben-rev',    fmtCurrency(m.benRev));
-  setText('kpi-roas-cash',  m.inversion > 0 ? fmtNum(m.roasCash, 2) + 'x' : '—');
-  setText('kpi-roas-rev',   m.inversion > 0 ? fmtNum(m.roasRev, 2) + 'x' : '—');
-  setText('kpi-periodo',    m.periodoLabel);
-
-  updateCharts(m);
-}
-
-// ── CHARTS ────────────────────────────────────────────────────────────────────
-function groupByDay(rows, dateKey, valueKey, parseVal = true) {
-  const map = {};
-  rows.forEach(r => {
-    const d = parseDate(r[dateKey]);
-    if (!d) return;
-    const key = d.toISOString().substring(0,10);
-    const v = parseVal ? parseNum(r[valueKey] || 0) : 1;
-    map[key] = (map[key] || 0) + v;
+  // sort
+  const dir = sortDir === 'asc' ? 1 : -1;
+  const sorted = [...rows].sort((a, b) => {
+    const av = a[sortCol], bv = b[sortCol];
+    if (sortCol === 'camp') return dir * String(av).localeCompare(String(bv));
+    return dir * ((av ?? -Infinity) - (bv ?? -Infinity));
   });
-  const sorted = Object.keys(map).sort();
-  return { labels: sorted, values: sorted.map(k => map[k]) };
+
+  // update sort indicators
+  document.querySelectorAll('#campTable thead th').forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    if (th.dataset.col === sortCol) th.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+  });
+
+  const tbody = document.getElementById('campTableBody');
+  tbody.innerHTML = '';
+
+  sorted.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="camp-name" title="${r.camp}">${r.camp}</td>
+      <td class="val-white">${fmtN(r.leads)}</td>
+      <td class="val-white">${fmtC(r.inversion)}</td>
+      <td class="val-blue">${r.cpl != null ? fmtC(r.cpl) : '—'}</td>
+      <td class="val-white">${fmtN(r.ventas)}</td>
+      <td class="val-blue">${fmtPct(r.conv)}</td>
+      <td class="val-white">${r.lxv != null ? fmtN(r.lxv, 0) : '—'}</td>
+      <td class="val-white">${r.cac != null ? fmtC(r.cac) : '—'}</td>
+      <td class="val-green">${fmtC(r.cash)}</td>
+      <td class="val-green">${fmtC(r.fact)}</td>
+      <td class="${r.bcash >= 0 ? 'val-green' : 'val-neg'}">${fmtC(r.bcash)}</td>
+      <td class="${r.brev  >= 0 ? 'val-green' : 'val-neg'}">${fmtC(r.brev)}</td>
+      <td class="val-yellow">${fmtX(r.roasCash)}</td>
+      <td class="val-yellow">${fmtX(r.roasRev)}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Total row
+  const tBcash = tCash - tInv, tBrev = tFact - tInv;
+  const tRoasCash = tInv > 0 ? tCash / tInv : null;
+  const tRoasRev  = tInv > 0 ? tFact / tInv : null;
+  const tCpl = tL > 0 && tInv > 0 ? tInv / tL : null;
+  const tConv = tL > 0 ? tV / tL * 100 : null;
+  const tLxv  = tV > 0 ? tL / tV : null;
+  const tCac  = tV > 0 && tInv > 0 ? tInv / tV : null;
+
+  const tr = document.createElement('tr');
+  tr.className = 'total-row';
+  tr.innerHTML = `
+    <td class="camp-name">TOTAL</td>
+    <td class="val-white">${fmtN(tL)}</td>
+    <td class="val-white">${fmtC(tInv)}</td>
+    <td class="val-blue">${tCpl != null ? fmtC(tCpl) : '—'}</td>
+    <td class="val-white">${fmtN(tV)}</td>
+    <td class="val-blue">${fmtPct(tConv)}</td>
+    <td class="val-white">${tLxv != null ? fmtN(tLxv, 0) : '—'}</td>
+    <td class="val-white">${tCac != null ? fmtC(tCac) : '—'}</td>
+    <td class="val-green">${fmtC(tCash)}</td>
+    <td class="val-green">${fmtC(tFact)}</td>
+    <td class="${tBcash >= 0 ? 'val-green' : 'val-neg'}">${fmtC(tBcash)}</td>
+    <td class="${tBrev  >= 0 ? 'val-green' : 'val-neg'}">${fmtC(tBrev)}</td>
+    <td class="val-yellow">${fmtX(tRoasCash)}</td>
+    <td class="val-yellow">${fmtX(tRoasRev)}</td>`;
+  tbody.appendChild(tr);
 }
 
+// ── CHARTS ────────────────────────────────────────────────────────────────
 function groupMetaByDay(metaRows) {
-  // meta rows have start/end date ranges → distribute spend across days
   const map = {};
   metaRows.forEach(r => {
-    const start = parseDate(r['Inicio del informe']);
-    const end   = parseDate(r['Fin del informe']);
+    const start = parseDate(r['Inicio del informe']), end = parseDate(r['Fin del informe']);
     if (!start || !end) return;
     const spend = parseNum(r['Importe gastado (ARS)'] || r['Importe gastado'] || 0);
     const days = Math.max(1, Math.round((end - start) / 86400000) + 1);
     const daily = spend / days;
     let cur = new Date(start);
     while (cur <= end) {
-      const key = cur.toISOString().substring(0,10);
-      map[key] = (map[key] || 0) + daily;
+      const k = cur.toISOString().substring(0,10);
+      map[k] = (map[k] || 0) + daily;
       cur.setDate(cur.getDate() + 1);
     }
   });
-  const sorted = Object.keys(map).sort();
-  return { labels: sorted, values: sorted.map(k => map[k]) };
+  const keys = Object.keys(map).sort();
+  return { labels: keys, values: keys.map(k => map[k]) };
 }
 
-function mergeLabels(...arrays) {
-  return [...new Set(arrays.flat())].sort();
+function groupLeadsByDay(leadRows) {
+  if (!leadsHasDate) return { labels: [], values: [] };
+  const map = {};
+  leadRows.forEach(r => {
+    const d = parseDate(r['Fecha'] || r['fecha']);
+    if (!d) return;
+    const k = d.toISOString().substring(0,10);
+    map[k] = (map[k] || 0) + 1;
+  });
+  const keys = Object.keys(map).sort();
+  return { labels: keys, values: keys.map(k => map[k]) };
 }
 
-function chartOptions(yLabel) {
-  return {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: {
-      backgroundColor: '#1e1e2e', borderColor: '#333', borderWidth: 1,
-      titleColor: '#ccc', bodyColor: '#fff',
-      callbacks: { label: ctx => ' ' + (yLabel === '$' ? fmtCurrency(ctx.parsed.y) : fmtNum(ctx.parsed.y, 2)) }
-    }},
-    scales: {
-      x: { grid: { color: '#222' }, ticks: { color: '#666', maxTicksLimit: 10, font: { size: 11 } } },
-      y: { grid: { color: '#222' }, ticks: { color: '#666', font: { size: 11 },
-        callback: v => yLabel === '$' ? '$' + Math.round(v/1000) + 'k' : v
-      }}
-    }
-  };
-}
+function updateCharts(meta, leads) {
+  const inv  = groupMetaByDay(meta);
+  const lead = groupLeadsByDay(leads);
+  const allL = [...new Set([...inv.labels, ...lead.labels])].sort();
 
-function updateCharts(m) {
-  const inv = groupMetaByDay(m.meta);
-
-  // Chart 1: inversión
-  if (chartInversionInst) chartInversionInst.destroy();
+  // Chart 1 – Inversión
+  if (chartInvInst) chartInvInst.destroy();
   const ctx1 = document.getElementById('chartInversion').getContext('2d');
-  const grad1 = ctx1.createLinearGradient(0, 0, 0, 220);
-  grad1.addColorStop(0, 'rgba(249,115,22,.35)');
-  grad1.addColorStop(1, 'rgba(249,115,22,.0)');
-  chartInversionInst = new Chart(ctx1, {
+  const g1 = ctx1.createLinearGradient(0,0,0,200);
+  g1.addColorStop(0,'rgba(249,115,22,.35)'); g1.addColorStop(1,'rgba(249,115,22,0)');
+  chartInvInst = new Chart(ctx1, {
     type: 'line',
-    data: {
-      labels: inv.labels,
-      datasets: [{
-        data: inv.values,
-        borderColor: '#f97316', borderWidth: 2,
-        backgroundColor: grad1,
-        pointBackgroundColor: '#f97316', pointRadius: 3, pointHoverRadius: 5,
-        fill: true, tension: .3
-      }]
-    },
-    options: { ...chartOptions('$'), animation: false }
+    data: { labels: inv.labels, datasets: [{ data: inv.values, borderColor: '#f97316', borderWidth: 2, backgroundColor: g1, pointRadius: 2, pointHoverRadius: 4, fill: true, tension: .3 }] },
+    options: chartOpts('$')
   });
 
-  // Chart 2: agendas + costo
-  const leadsDateKey = leadsHasDate ? (rawLeads[0]?.['Fecha'] ? 'Fecha' : 'fecha') : null;
-  let agLabels = [], agValues = [];
-
-  if (leadsDateKey) {
-    const ag = groupByDay(m.leads, leadsDateKey, null, false);
-    agLabels = ag.labels; agValues = ag.values;
-  } else if (m.compradores.length > 0) {
-    // fallback: use compradores fecha as proxy for agendas timing
-    const ag = groupByDay(m.compradores, 'Fecha', null, false);
-    agLabels = ag.labels; agValues = ag.values;
-  }
-
-  const allLabels = mergeLabels(agLabels, inv.labels);
-  const agMap = Object.fromEntries(agLabels.map((l,i) => [l, agValues[i]]));
-  const invMap = Object.fromEntries(inv.labels.map((l,i) => [l, inv.values[i]]));
-
-  const agData   = allLabels.map(l => agMap[l] || 0);
-  const costData = allLabels.map(l => {
-    const a = agMap[l] || 0;
-    const i = invMap[l] || 0;
-    return a > 0 ? i / a : null;
+  // Chart 2 – Leads + CPL
+  const invMap  = Object.fromEntries(inv.labels.map((l,i) => [l, inv.values[i]]));
+  const leadMap = Object.fromEntries(lead.labels.map((l,i) => [l, lead.values[i]]));
+  const agData  = allL.map(l => leadMap[l] || 0);
+  const cplData = allL.map(l => {
+    const a = leadMap[l] || 0, i = invMap[l] || 0;
+    return a > 0 && i > 0 ? i / a : null;
   });
 
-  if (chartAgendasInst) chartAgendasInst.destroy();
-  const ctx2 = document.getElementById('chartAgendas').getContext('2d');
-  chartAgendasInst = new Chart(ctx2, {
+  if (chartLeadsInst) chartLeadsInst.destroy();
+  const ctx2 = document.getElementById('chartLeads').getContext('2d');
+  chartLeadsInst = new Chart(ctx2, {
     data: {
-      labels: allLabels,
+      labels: allL,
       datasets: [
-        {
-          type: 'bar', label: 'Agendas', data: agData,
-          backgroundColor: 'rgba(167,139,250,.6)',
-          borderColor: 'rgba(167,139,250,.9)', borderWidth: 1,
-          yAxisID: 'y'
-        },
-        {
-          type: 'line', label: 'Costo / agenda', data: costData,
-          borderColor: '#f97316', borderWidth: 2,
-          pointBackgroundColor: '#f97316', pointRadius: 3, pointHoverRadius: 5,
-          fill: false, tension: .3,
-          yAxisID: 'y2'
-        }
+        { type:'bar',  label:'Leads', data: agData, backgroundColor:'rgba(167,139,250,.6)', borderColor:'rgba(167,139,250,.9)', borderWidth:1, yAxisID:'y' },
+        { type:'line', label:'CPL',   data: cplData, borderColor:'#f97316', borderWidth:2, pointRadius:2, pointHoverRadius:4, fill:false, tension:.3, yAxisID:'y2' }
       ]
     },
     options: {
-      responsive: true, maintainAspectRatio: false, animation: false,
-      plugins: { legend: { display: false }, tooltip: {
-        backgroundColor: '#1e1e2e', borderColor: '#333', borderWidth: 1,
-        titleColor: '#ccc', bodyColor: '#fff'
-      }},
-      scales: {
-        x:  { grid: { color: '#222' }, ticks: { color: '#666', maxTicksLimit: 10, font: { size: 11 } } },
-        y:  { position: 'left',  grid: { color: '#222' }, ticks: { color: '#666', font: { size: 11 } } },
-        y2: { position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#f97316', font: { size: 11 },
-          callback: v => fmtCurrency(v)
-        }}
+      responsive:true, maintainAspectRatio:false, animation:false,
+      plugins:{ legend:{ display:false }, tooltip:{ backgroundColor:'#1e1e2e', borderColor:'#333', borderWidth:1, titleColor:'#ccc', bodyColor:'#fff' } },
+      scales:{
+        x:  { grid:{ color:'#222' }, ticks:{ color:'#666', maxTicksLimit:10, font:{ size:10 } } },
+        y:  { position:'left',  grid:{ color:'#222' }, ticks:{ color:'#666', font:{ size:10 } } },
+        y2: { position:'right', grid:{ drawOnChartArea:false }, ticks:{ color:'#f97316', font:{ size:10 }, callback: v => fmtC(v) } }
       }
     }
   });
 }
 
-// ── LOAD ──────────────────────────────────────────────────────────────────────
+function chartOpts(type) {
+  return {
+    responsive:true, maintainAspectRatio:false, animation:false,
+    plugins:{ legend:{ display:false }, tooltip:{ backgroundColor:'#1e1e2e', borderColor:'#333', borderWidth:1, titleColor:'#ccc', bodyColor:'#fff', callbacks:{ label: ctx => ' ' + (type==='$' ? fmtC(ctx.parsed.y) : fmtN(ctx.parsed.y,2)) } } },
+    scales:{
+      x: { grid:{ color:'#222' }, ticks:{ color:'#666', maxTicksLimit:10, font:{ size:10 } } },
+      y: { grid:{ color:'#222' }, ticks:{ color:'#666', font:{ size:10 }, callback: v => type==='$' ? '$'+Math.round(v/1000)+'k' : v } }
+    }
+  };
+}
+
+// ── LOAD ──────────────────────────────────────────────────────────────────
 async function loadData() {
   document.getElementById('loadingOverlay').style.display = 'flex';
   document.getElementById('errorBanner').style.display = 'none';
   try {
     [rawLeads, rawCompradores, rawMeta] = await Promise.all([
-      fetchSheet('leads'),
-      fetchSheet('compradores'),
-      fetchSheet('meta'),
+      fetchSheet('leads'), fetchSheet('compradores'), fetchSheet('meta')
     ]);
 
-    // detect date column in leads
-    const sampleLead = rawLeads[0] || {};
-    leadsHasDate = !!(sampleLead['Fecha'] || sampleLead['fecha'] || sampleLead['Timestamp'] || sampleLead['timestamp']);
+    const sample = rawLeads[0] || {};
+    leadsHasDate = !!(sample['Fecha'] || sample['fecha'] || sample['Timestamp']);
     document.getElementById('notaLeads').style.display = leadsHasDate ? 'none' : 'block';
 
     populateSelects();
@@ -890,70 +764,59 @@ async function loadData() {
       'Datos: ' + now.toLocaleDateString('es-AR') + ', ' + now.toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' });
 
     render();
-  } catch (e) {
-    const banner = document.getElementById('errorBanner');
-    banner.style.display = 'block';
-    banner.textContent = '⚠️ Error al cargar datos: ' + e.message +
-      '. Asegúrate de que el Google Sheets sea público (Compartir → "Cualquier persona con el enlace puede ver").';
+  } catch(e) {
+    const b = document.getElementById('errorBanner');
+    b.style.display = 'block';
+    b.textContent = '⚠️ Error: ' + e.message + '. Verifica que el Google Sheets sea público.';
   } finally {
     document.getElementById('loadingOverlay').style.display = 'none';
   }
 }
 
-// ── EVENTS ────────────────────────────────────────────────────────────────────
-document.querySelectorAll('.btn-date').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.btn-date').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeRange = btn.dataset.range;
-    // clear custom dates
-    document.getElementById('dateFrom').value = '';
-    document.getElementById('dateTo').value = '';
-    dateFrom = null; dateTo = null;
-    render();
-  });
-});
-
-document.querySelectorAll('.btn-source').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.btn-source').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeSource = btn.dataset.source;
-    render();
-  });
-});
-
-document.getElementById('selCampaign').addEventListener('change', e => {
-  activeCampaign = e.target.value;
+// ── EVENTS ────────────────────────────────────────────────────────────────
+document.querySelectorAll('.btn-date').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('.btn-date').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeRange = btn.dataset.range;
+  dateFrom = null; dateTo = null;
+  document.getElementById('dateFrom').value = '';
+  document.getElementById('dateTo').value = '';
   render();
-});
+}));
 
-document.getElementById('selAd').addEventListener('change', e => {
-  activeAd = e.target.value;
+document.querySelectorAll('.btn-source').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('.btn-source').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeSource = btn.dataset.source;
   render();
-});
+}));
+
+document.getElementById('selCampaign').addEventListener('change', e => { activeCampaign = e.target.value; render(); });
+document.getElementById('selAd').addEventListener('change', e => { activeAd = e.target.value; render(); });
 
 document.getElementById('dateFrom').addEventListener('change', e => {
   dateFrom = e.target.value ? new Date(e.target.value) : null;
-  if (dateFrom) {
-    activeRange = 'custom';
-    document.querySelectorAll('.btn-date').forEach(b => b.classList.remove('active'));
-    render();
-  }
+  if (dateFrom) { activeRange = 'custom'; document.querySelectorAll('.btn-date').forEach(b => b.classList.remove('active')); render(); }
 });
-
 document.getElementById('dateTo').addEventListener('change', e => {
   dateTo = e.target.value ? new Date(e.target.value + 'T23:59:59') : null;
-  if (dateTo) {
-    activeRange = 'custom';
-    document.querySelectorAll('.btn-date').forEach(b => b.classList.remove('active'));
-    render();
-  }
+  if (dateTo) { activeRange = 'custom'; document.querySelectorAll('.btn-date').forEach(b => b.classList.remove('active')); render(); }
 });
 
 document.getElementById('btnRefresh').addEventListener('click', loadData);
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
+// Table sort
+document.querySelectorAll('#campTable thead th').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (!col) return;
+    if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+    else { sortCol = col; sortDir = col === 'camp' ? 'asc' : 'desc'; }
+    render();
+  });
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────
 loadData();
 </script>
 </body>
