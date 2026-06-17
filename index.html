@@ -201,31 +201,11 @@
 <div class="filters-bar">
   <div style="display:flex;gap:4px;flex-wrap:wrap">
     <button class="btn-date active" data-range="all">Todo</button>
-    <button class="btn-date" data-range="today">Hoy</button>
-    <button class="btn-date" data-range="yesterday">Ayer</button>
-    <button class="btn-date" data-range="3d">3 días</button>
-    <button class="btn-date" data-range="7d">7 días</button>
-    <button class="btn-date" data-range="30d">30 días</button>
-    <button class="btn-date" data-range="thisMonth">Mes actual</button>
-    <button class="btn-date" data-range="lastMonth">Mes anterior</button>
   </div>
-  <input type="date" id="dateFrom" title="Desde" />
-  <span style="color:var(--text-muted)">→</span>
-  <input type="date" id="dateTo" title="Hasta" />
   <div class="refresh-info">
     <span id="lastUpdate">—</span>
     <button class="btn-refresh" id="btnRefresh">↻ Refrescar</button>
   </div>
-</div>
-
-<!-- Fuente -->
-<div class="source-bar">
-  <span class="source-label">🔍 Fuente:</span>
-  <button class="btn-source active" data-source="all">Todas</button>
-  <button class="btn-source" data-source="ads">Ads</button>
-  <button class="btn-source" data-source="setting">Setting</button>
-  <button class="btn-source" data-source="referidos">Referidos</button>
-  <button class="btn-source" data-source="direct">Direct</button>
 </div>
 
 <!-- Campaña / Anuncio -->
@@ -683,30 +663,11 @@ document.querySelectorAll('.btn-date').forEach(btn => btn.addEventListener('clic
   document.querySelectorAll('.btn-date').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   activeRange = btn.dataset.range;
-  dateFrom = null; dateTo = null;
-  document.getElementById('dateFrom').value = '';
-  document.getElementById('dateTo').value = '';
-  render();
-}));
-
-document.querySelectorAll('.btn-source').forEach(btn => btn.addEventListener('click', () => {
-  document.querySelectorAll('.btn-source').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  activeSource = btn.dataset.source;
   render();
 }));
 
 document.getElementById('selCampaign').addEventListener('change', e => { activeCampaign = e.target.value; render(); });
 document.getElementById('selAd').addEventListener('change', e => { activeAd = e.target.value; render(); });
-
-document.getElementById('dateFrom').addEventListener('change', e => {
-  dateFrom = e.target.value ? new Date(e.target.value) : null;
-  if (dateFrom) { activeRange = 'custom'; document.querySelectorAll('.btn-date').forEach(b => b.classList.remove('active')); render(); }
-});
-document.getElementById('dateTo').addEventListener('change', e => {
-  dateTo = e.target.value ? new Date(e.target.value + 'T23:59:59') : null;
-  if (dateTo) { activeRange = 'custom'; document.querySelectorAll('.btn-date').forEach(b => b.classList.remove('active')); render(); }
-});
 
 document.getElementById('btnRefresh').addEventListener('click', loadData);
 
