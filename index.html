@@ -544,7 +544,19 @@ function buildRows(dim, leads, compradores, meta) {
   });
 
   meta.forEach(r => {
-    const k = normKey(dim, normStr(r[cfg.metaKey])) || 'Sin atribuir';
+    let k;
+    if (dim === 'ubicacion') {
+      const ubic = normStr(r[cfg.metaKey] || '');
+      if (ubic.toLowerCase() === 'feed') {
+        const plat = normStr(r['Plataforma'] || '').toLowerCase();
+        k = plat === 'instagram' ? 'Instagram Feed' : 'Facebook Feed';
+      } else {
+        k = normKey(dim, ubic);
+      }
+    } else {
+      k = normKey(dim, normStr(r[cfg.metaKey]));
+    }
+    k = k || 'Sin atribuir';
     byMeta[k] = (byMeta[k] || 0) + spend(r);
   });
 
