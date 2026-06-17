@@ -310,6 +310,34 @@
   </div>
 </div>
 
+<!-- Tabla por ad -->
+<div class="table-section" style="padding-top:0">
+  <div class="table-title"><span>Desglose por Ad</span></div>
+  <div class="table-wrap">
+    <table id="adTable">
+      <thead>
+        <tr>
+          <th data-col="camp" data-table="ad">AD</th>
+          <th data-col="leads" data-table="ad">Leads</th>
+          <th data-col="inversion" data-table="ad">Inversión</th>
+          <th data-col="cpl" data-table="ad">CPL</th>
+          <th data-col="ventas" data-table="ad">Ventas</th>
+          <th data-col="conv" data-table="ad">% Conv.</th>
+          <th data-col="lxv" data-table="ad">Leads x Venta</th>
+          <th data-col="cac" data-table="ad">CAC</th>
+          <th data-col="cash" data-table="ad">Cash</th>
+          <th data-col="fact" data-table="ad">Fact</th>
+          <th data-col="bcash" data-table="ad">Beneficio Cash</th>
+          <th data-col="brev" data-table="ad">Beneficio Revenue</th>
+          <th data-col="roasCash" data-table="ad">ROAS Cash</th>
+          <th data-col="roasRev" data-table="ad">ROAS Revenue</th>
+        </tr>
+      </thead>
+      <tbody id="adTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
 <script>
 // ── CONFIG ──────────────────────────────────────────────────────────────
 const SHEET_ID = '1H1Kar_vQ4zfEN7Om2YdFyaozx6gWQHd4EGFt3mUEEFw';
@@ -330,6 +358,7 @@ let dateFrom = null, dateTo = null;
 let leadsHasDate = false;
 let sortCol = 'leads', sortDir = 'desc';
 let sortColAdset = 'leads', sortDirAdset = 'desc';
+let sortColAd = 'leads', sortDirAd = 'desc';
 
 // ── UTILS ──────────────────────────────────────────────────────────────
 function normStr(s) { return (s || '').replace(/\\\//g, '/').trim(); }
@@ -555,6 +584,52 @@ function buildAdsetRows(leads, compradores, meta) {
   });
 }
 
+// ── AD BREAKDOWN ────────────────────────────────────────────────────────────
+function buildAdRows(leads, compradores, meta) {
+  const leadsByAd = {};
+  leads.forEach(r => {
+    const a = normStr(r['utm_term']) || 'Desconocido';
+    leadsByAd[a] = (leadsByAd[a] || 0) + 1;
+  });
+
+  const compByAd = {};
+  compradores.forEach(r => {
+    const a = normStr(r['AD'] || '') || 'Desconocido';
+    if (!compByAd[a]) compByAd[a] = { ventas: 0, cash: 0, fact: 0 };
+    compByAd[a].ventas++;
+    compByAd[a].cash += parseNum(r['Neto'] || 0);
+    compByAd[a].fact += parseNum(r['Facturación Bruta'] || 0);
+  });
+
+  const metaByAd = {};
+  meta.forEach(r => {
+    const a = normStr(r['Nombre del anuncio'] || '') || 'Desconocido';
+    metaByAd[a] = (metaByAd[a] || 0) + parseNum(r['Importe gastado (ARS)'] || r['Importe gastado'] || 0);
+  });
+
+  const allAds = [...new Set([
+    ...Object.keys(leadsByAd),
+    ...Object.keys(compByAd),
+    ...Object.keys(metaByAd),
+  ])].filter(a => !isTemplate(a));
+
+  return allAds.map(ad => {
+    const l   = leadsByAd[ad]  || 0;
+    const cv  = compByAd[ad]   || { ventas: 0, cash: 0, fact: 0 };
+    const inv = metaByAd[ad]   || 0;
+    const cpl      = l > 0 && inv > 0 ? inv / l : null;
+    const conv     = l > 0 ? (cv.ventas / l * 100) : null;
+    const lxv      = cv.ventas > 0 ? l / cv.ventas : null;
+    const cac      = cv.ventas > 0 && inv > 0 ? inv / cv.ventas : null;
+    const bcash    = cv.cash - inv;
+    const brev     = cv.fact - inv;
+    const roasCash = inv > 0 ? cv.cash / inv : null;
+    const roasRev  = inv > 0 ? cv.fact / inv : null;
+    return { camp: ad, leads: l, inversion: inv, cpl, ventas: cv.ventas, conv, lxv, cac,
+             cash: cv.cash, fact: cv.fact, bcash, brev, roasCash, roasRev };
+  });
+}
+
 // ── POPULATE SELECTS ──────────────────────────────────────────────────────
 function populateSelects() {
   const camps = [...new Set([
@@ -628,6 +703,9 @@ function render() {
 
   const adsetRows = buildAdsetRows(leads, comp, meta);
   renderTable(adsetRows, totalLeads, totalVentas, totalInv, totalCash, totalFact, 'adsetTableBody', '#adsetTable thead th', sortColAdset, sortDirAdset);
+
+  const adRows = buildAdRows(leads, comp, meta);
+  renderTable(adRows, totalLeads, totalVentas, totalInv, totalCash, totalFact, 'adTableBody', '#adTable thead th', sortColAd, sortDirAd);
 
 }
 
@@ -781,6 +859,16 @@ document.querySelectorAll('#adsetTable thead th').forEach(th => {
     if (!col) return;
     if (sortColAdset === col) { sortDirAdset = sortDirAdset === 'asc' ? 'desc' : 'asc'; }
     else { sortColAdset = col; sortDirAdset = col === 'camp' ? 'asc' : 'desc'; }
+    render();
+  });
+});
+
+document.querySelectorAll('#adTable thead th').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (!col) return;
+    if (sortColAd === col) { sortDirAd = sortDirAd === 'asc' ? 'desc' : 'asc'; }
+    else { sortColAd = col; sortDirAd = col === 'camp' ? 'asc' : 'desc'; }
     render();
   });
 });
