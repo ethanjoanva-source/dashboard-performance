@@ -482,10 +482,29 @@ const FUENTE_NORM = {
   direct: 'Direct',
 };
 
+const UBICACION_NORM = {
+  facebook_mobile_reels:   'Facebook Reels',
+  facebook_mobile_feed:    'Facebook Feed',
+  facebook_desktop_feed:   'Facebook Feed',
+  facebook_profile_feed:   'Facebook Feed',
+  facebook_stories:        'Facebook Stories',
+  facebook_instream_video: 'Facebook Video',
+  facebook_marketplace:    'Facebook Marketplace',
+  instagram_reels:         'Instagram Reels',
+  instagram_feed:          'Instagram Feed',
+  instagram_stories:       'Instagram Stories',
+  instagram_search:        'Instagram Search',
+  others:                  'Otros',
+  social:                  'Social',
+  '#n/a':                  'Sin atribuir',
+  utm_medium:              'Sin atribuir',
+};
+
 function normKey(dim, raw) {
   const s = (raw || '').trim();
   if (!s) return 'Sin atribuir';
-  if (dim === 'fuente') return FUENTE_NORM[s.toLowerCase()] || s;
+  if (dim === 'fuente')    return FUENTE_NORM[s.toLowerCase()] || s;
+  if (dim === 'ubicacion') return UBICACION_NORM[s.toLowerCase()] || s;
   return s;
 }
 
