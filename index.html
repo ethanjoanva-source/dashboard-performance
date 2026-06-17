@@ -366,7 +366,7 @@ function getSourceGroup(src) {
 
 // ── FETCH ──────────────────────────────────────────────────────────────
 async function fetchSheet(name) {
-  const res = await fetch(BASE_URL + encodeURIComponent(name));
+  const res = await fetch(BASE_URL + encodeURIComponent(name) + '&tq=select%20*');
   if (!res.ok) throw new Error(`No se pudo cargar "${name}" (${res.status})`);
   return Papa.parse(await res.text(), { header: true, skipEmptyLines: true }).data;
 }
