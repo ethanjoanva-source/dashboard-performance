@@ -607,7 +607,7 @@ function renderTable(rows, tL, tV, tInv, tCash, tFact) {
       <td class="val-blue">${r.cpl != null ? fmtC(r.cpl) : '—'}</td>
       <td class="val-white">${fmtN(r.ventas)}</td>
       <td class="val-blue">${fmtPct(r.conv)}</td>
-      <td class="val-white">${r.lxv != null ? fmtN(r.lxv, 0) : '—'}</td>
+      <td class="val-white">${fmtN(r.ventas)}</td>
       <td class="val-white">${r.cac != null ? fmtC(r.cac) : '—'}</td>
       <td class="val-green">${fmtC(r.cash)}</td>
       <td class="val-green">${fmtC(r.fact)}</td>
@@ -636,7 +636,7 @@ function renderTable(rows, tL, tV, tInv, tCash, tFact) {
     <td class="val-blue">${tCpl != null ? fmtC(tCpl) : '—'}</td>
     <td class="val-white">${fmtN(tV)}</td>
     <td class="val-blue">${fmtPct(tConv)}</td>
-    <td class="val-white">${tLxv != null ? fmtN(tLxv, 0) : '—'}</td>
+    <td class="val-white">${fmtN(tV)}</td>
     <td class="val-white">${tCac != null ? fmtC(tCac) : '—'}</td>
     <td class="val-green">${fmtC(tCash)}</td>
     <td class="val-green">${fmtC(tFact)}</td>
