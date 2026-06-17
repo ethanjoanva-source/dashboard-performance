@@ -568,7 +568,7 @@ function render() {
   const totalInv  = meta.reduce((s, r) => s + parseNum(r['Importe gastado (ARS)'] || r['Importe gastado'] || 0), 0);
 
   const noFilters = activeCampaign === 'all' && activeAd === 'all' && activeRange === 'all';
-  const totalVentas = noFilters && rawCompAgg ? parseInt(rawCompAgg['count Fecha'] || 0)                     : comp.length;
+  const totalVentas = noFilters && rawCompAgg ? parseInt(rawCompAgg['count Ticket'] || 0)                     : comp.length;
   const totalCash   = noFilters && rawCompAgg ? parseFloat(rawCompAgg['sum Neto'] || 0)                       : comp.reduce((s, r) => s + parseNum(r['Neto'] || 0), 0);
   const totalFact   = noFilters && rawCompAgg ? parseFloat(rawCompAgg['sum Facturación Bruta'] || 0)          : comp.reduce((s, r) => s + parseNum(r['Facturación Bruta'] || 0), 0);
 
@@ -949,7 +949,7 @@ async function loadData() {
   try {
     [rawLeads, rawCompradores, rawMeta, rawCompAgg] = await Promise.all([
       fetchSheet('leads'), fetchSheet('compradores'), fetchSheet('meta'),
-      fetchAggregate('compradores', 'select count(I), sum(D), sum(F)')
+      fetchAggregate('compradores', 'select count(C), sum(D), sum(F)')
     ]);
 
     const sample = rawLeads[0] || {};
