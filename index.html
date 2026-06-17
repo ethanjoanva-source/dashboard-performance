@@ -712,13 +712,16 @@ function renderCharts(rows) {
   const shortLabels = sorted.map(r => truncLabel(r.camp, 14));
 
   const DEFS = [
+    // ── Fila 1: Volumen + Eficiencia ──
     { title: 'Leads',              kind: 'donut', data: sorted.map(r => r.leads),           colors: segColors,  fmt: v => fmtN(v) },
     { title: 'Ventas',             kind: 'donut', data: sorted.map(r => r.ventas),          colors: segColors,  fmt: v => fmtN(v) },
+    { title: 'ROAS Cash',          kind: 'vbar',  data: sorted.map(r => r.roasCash || 0),   color: C.yellow,    fmt: v => fmtN(v,2) + 'x' },
+    // ── Fila 2: Inversión y Costo ──
     { title: 'Inversión + CPL',    kind: 'combo',
       invData: sorted.map(r => r.inversion),
       cplData: sorted.map(r => r.cpl || 0) },
     { title: 'CAC',                kind: 'vbar',  data: sorted.map(r => r.cac   || 0),      color: C.orange,    fmt: v => '$' + fmtN(v) },
-    { title: 'ROAS Cash',          kind: 'vbar',  data: sorted.map(r => r.roasCash || 0),   color: C.yellow,    fmt: v => fmtN(v,2) + 'x' },
+    // ── Fila 3: Revenue ──
     { title: 'Cash',               kind: 'donut', data: sorted.map(r => r.cash),            colors: segColors,  fmt: v => '$' + fmtN(v) },
     { title: 'Facturación',        kind: 'donut', data: sorted.map(r => r.fact),            colors: segColors,  fmt: v => '$' + fmtN(v) },
     { title: 'Beneficio Cash',     kind: 'donut', data: sorted.map(r => Math.abs(r.bcash)), colors: benColors,  fmt: (v, i) => '$' + fmtN(sorted[i]?.bcash ?? v), realData: sorted.map(r => r.bcash) },
