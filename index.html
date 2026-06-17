@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard de Performance</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -146,15 +145,6 @@
     td.val-neg    { color: #f87171; }
     td.camp-name  { color: var(--text); }
 
-    /* ── CHARTS ── */
-    .charts-section {
-      padding: 0 28px 20px;
-      display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
-    }
-    @media (max-width: 900px) { .charts-section { grid-template-columns: 1fr; } }
-    .chart-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 10px; padding: 18px; }
-    .chart-title { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 14px; }
-    .chart-title span { color: var(--text); }
 
     /* ── LOADING ── */
     .loading-overlay {
@@ -263,21 +253,6 @@
   </div>
 </div>
 
-<!-- Charts -->
-<div class="charts-section" style="margin-top:20px">
-  <div class="chart-card">
-    <div class="chart-title"><span>Inversión por fecha</span></div>
-    <canvas id="chartInversion" height="200"></canvas>
-  </div>
-  <div class="chart-card">
-    <div class="chart-title"><span>Leads por fecha</span> · <span>CPL</span></div>
-    <canvas id="chartLeads" height="200"></canvas>
-    <div class="chart-legend">
-      <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Leads</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#f97316;border-radius:50%"></div>CPL</div>
-    </div>
-  </div>
-</div>
 
 <!-- Tabla por campaña -->
 <div class="table-section">
@@ -326,7 +301,6 @@ let activeCampaign = 'all', activeAd = 'all';
 let dateFrom = null, dateTo = null;
 let leadsHasDate = false;
 let sortCol = 'leads', sortDir = 'desc';
-let chartInvInst = null, chartLeadsInst = null;
 
 // ── UTILS ──────────────────────────────────────────────────────────────
 function normStr(s) { return (s || '').replace(/\\\//g, '/').trim(); }
@@ -577,8 +551,6 @@ function render() {
   const rows = buildCampaignRows(leads, comp, meta);
   renderTable(rows, totalLeads, totalVentas, totalInv, totalCash, totalFact);
 
-  // Charts
-  updateCharts(meta, leads);
 }
 
 // ── TABLE RENDER ────────────────────────────────────────────────────────
@@ -654,95 +626,6 @@ function renderTable(rows, tL, tV, tInv, tCash, tFact) {
 }
 
 // ── CHARTS ────────────────────────────────────────────────────────────────
-function groupMetaByDay(metaRows) {
-  const map = {};
-  metaRows.forEach(r => {
-    const start = parseDate(r['Inicio del informe']), end = parseDate(r['Fin del informe']);
-    if (!start || !end) return;
-    const spend = parseNum(r['Importe gastado (ARS)'] || r['Importe gastado'] || 0);
-    const days = Math.max(1, Math.round((end - start) / 86400000) + 1);
-    const daily = spend / days;
-    let cur = new Date(start);
-    while (cur <= end) {
-      const k = cur.toISOString().substring(0,10);
-      map[k] = (map[k] || 0) + daily;
-      cur.setDate(cur.getDate() + 1);
-    }
-  });
-  const keys = Object.keys(map).sort();
-  return { labels: keys, values: keys.map(k => map[k]) };
-}
-
-function groupLeadsByDay(leadRows) {
-  if (!leadsHasDate) return { labels: [], values: [] };
-  const map = {};
-  leadRows.forEach(r => {
-    const d = parseDate(r['Fecha'] || r['fecha']);
-    if (!d) return;
-    const k = d.toISOString().substring(0,10);
-    map[k] = (map[k] || 0) + 1;
-  });
-  const keys = Object.keys(map).sort();
-  return { labels: keys, values: keys.map(k => map[k]) };
-}
-
-function updateCharts(meta, leads) {
-  const inv  = groupMetaByDay(meta);
-  const lead = groupLeadsByDay(leads);
-  const allL = [...new Set([...inv.labels, ...lead.labels])].sort();
-
-  // Chart 1 – Inversión
-  if (chartInvInst) chartInvInst.destroy();
-  const ctx1 = document.getElementById('chartInversion').getContext('2d');
-  const g1 = ctx1.createLinearGradient(0,0,0,200);
-  g1.addColorStop(0,'rgba(249,115,22,.35)'); g1.addColorStop(1,'rgba(249,115,22,0)');
-  chartInvInst = new Chart(ctx1, {
-    type: 'line',
-    data: { labels: inv.labels, datasets: [{ data: inv.values, borderColor: '#f97316', borderWidth: 2, backgroundColor: g1, pointRadius: 2, pointHoverRadius: 4, fill: true, tension: .3 }] },
-    options: chartOpts('$')
-  });
-
-  // Chart 2 – Leads + CPL
-  const invMap  = Object.fromEntries(inv.labels.map((l,i) => [l, inv.values[i]]));
-  const leadMap = Object.fromEntries(lead.labels.map((l,i) => [l, lead.values[i]]));
-  const agData  = allL.map(l => leadMap[l] || 0);
-  const cplData = allL.map(l => {
-    const a = leadMap[l] || 0, i = invMap[l] || 0;
-    return a > 0 && i > 0 ? i / a : null;
-  });
-
-  if (chartLeadsInst) chartLeadsInst.destroy();
-  const ctx2 = document.getElementById('chartLeads').getContext('2d');
-  chartLeadsInst = new Chart(ctx2, {
-    data: {
-      labels: allL,
-      datasets: [
-        { type:'bar',  label:'Leads', data: agData, backgroundColor:'rgba(167,139,250,.6)', borderColor:'rgba(167,139,250,.9)', borderWidth:1, yAxisID:'y' },
-        { type:'line', label:'CPL',   data: cplData, borderColor:'#f97316', borderWidth:2, pointRadius:2, pointHoverRadius:4, fill:false, tension:.3, yAxisID:'y2' }
-      ]
-    },
-    options: {
-      responsive:true, maintainAspectRatio:false, animation:false,
-      plugins:{ legend:{ display:false }, tooltip:{ backgroundColor:'#1e1e2e', borderColor:'#333', borderWidth:1, titleColor:'#ccc', bodyColor:'#fff' } },
-      scales:{
-        x:  { grid:{ color:'#222' }, ticks:{ color:'#666', maxTicksLimit:10, font:{ size:10 } } },
-        y:  { position:'left',  grid:{ color:'#222' }, ticks:{ color:'#666', font:{ size:10 } } },
-        y2: { position:'right', grid:{ drawOnChartArea:false }, ticks:{ color:'#f97316', font:{ size:10 }, callback: v => fmtC(v) } }
-      }
-    }
-  });
-}
-
-function chartOpts(type) {
-  return {
-    responsive:true, maintainAspectRatio:false, animation:false,
-    plugins:{ legend:{ display:false }, tooltip:{ backgroundColor:'#1e1e2e', borderColor:'#333', borderWidth:1, titleColor:'#ccc', bodyColor:'#fff', callbacks:{ label: ctx => ' ' + (type==='$' ? fmtC(ctx.parsed.y) : fmtN(ctx.parsed.y,2)) } } },
-    scales:{
-      x: { grid:{ color:'#222' }, ticks:{ color:'#666', maxTicksLimit:10, font:{ size:10 } } },
-      y: { grid:{ color:'#222' }, ticks:{ color:'#666', font:{ size:10 }, callback: v => type==='$' ? '$'+Math.round(v/1000)+'k' : v } }
-    }
-  };
-}
 
 // ── LOAD ──────────────────────────────────────────────────────────────────
 async function loadData() {
