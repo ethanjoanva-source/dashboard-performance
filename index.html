@@ -109,10 +109,21 @@
     .color-orange { color: var(--accent-orange); }
     .color-yellow { color: var(--accent-yellow); }
 
-    /* ── CAMPAIGN TABLE ── */
+    /* ── TABLE + TABS ── */
     .table-section { padding: 20px 28px 28px; }
-    .table-title { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; }
-    .table-title span { color: var(--text); }
+    .tab-bar {
+      display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap;
+    }
+    .btn-tab {
+      background: transparent; border: 1px solid var(--card-border);
+      color: var(--text-muted); padding: 6px 16px; border-radius: 20px;
+      cursor: pointer; font-size: 13px; font-weight: 500; transition: all .15s;
+    }
+    .btn-tab:hover { border-color: #555; color: var(--text); }
+    .btn-tab.active {
+      background: var(--accent-blue); border-color: var(--accent-blue);
+      color: #fff; font-weight: 600;
+    }
     .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--card-border); }
 
     table {
@@ -254,86 +265,36 @@
 </div>
 
 
-<!-- Tabla por campaña -->
+<!-- Tabla con tabs -->
 <div class="table-section">
-  <div class="table-title"><span>Desglose por Campaña</span></div>
-  <div class="table-wrap">
-    <table id="campTable">
-      <thead>
-        <tr>
-          <th data-col="camp" data-table="camp">Campaña</th>
-          <th data-col="leads" data-table="camp">Leads</th>
-          <th data-col="inversion" data-table="camp">Inversión</th>
-          <th data-col="cpl" data-table="camp">CPL</th>
-          <th data-col="ventas" data-table="camp">Ventas</th>
-          <th data-col="conv" data-table="camp">% Conv.</th>
-          <th data-col="lxv" data-table="camp">Leads x Venta</th>
-          <th data-col="cac" data-table="camp">CAC</th>
-          <th data-col="cash" data-table="camp">Cash</th>
-          <th data-col="fact" data-table="camp">Fact</th>
-          <th data-col="bcash" data-table="camp">Beneficio Cash</th>
-          <th data-col="brev" data-table="camp">Beneficio Revenue</th>
-          <th data-col="roasCash" data-table="camp">ROAS Cash</th>
-          <th data-col="roasRev" data-table="camp">ROAS Revenue</th>
-        </tr>
-      </thead>
-      <tbody id="campTableBody"></tbody>
-    </table>
+  <div class="tab-bar">
+    <button class="btn-tab active" data-dim="campana">Campaña</button>
+    <button class="btn-tab" data-dim="adset">Adset</button>
+    <button class="btn-tab" data-dim="ad">Ad</button>
+    <button class="btn-tab" data-dim="fuente">Fuente</button>
+    <button class="btn-tab" data-dim="ubicacion">Ubicación</button>
   </div>
-</div>
-
-<!-- Tabla por adset -->
-<div class="table-section" style="padding-top:0">
-  <div class="table-title"><span>Desglose por Adset</span></div>
   <div class="table-wrap">
-    <table id="adsetTable">
+    <table id="mainTable">
       <thead>
         <tr>
-          <th data-col="camp" data-table="adset">Adset</th>
-          <th data-col="leads" data-table="adset">Leads</th>
-          <th data-col="inversion" data-table="adset">Inversión</th>
-          <th data-col="cpl" data-table="adset">CPL</th>
-          <th data-col="ventas" data-table="adset">Ventas</th>
-          <th data-col="conv" data-table="adset">% Conv.</th>
-          <th data-col="lxv" data-table="adset">Leads x Venta</th>
-          <th data-col="cac" data-table="adset">CAC</th>
-          <th data-col="cash" data-table="adset">Cash</th>
-          <th data-col="fact" data-table="adset">Fact</th>
-          <th data-col="bcash" data-table="adset">Beneficio Cash</th>
-          <th data-col="brev" data-table="adset">Beneficio Revenue</th>
-          <th data-col="roasCash" data-table="adset">ROAS Cash</th>
-          <th data-col="roasRev" data-table="adset">ROAS Revenue</th>
+          <th data-col="camp">Campaña</th>
+          <th data-col="leads">Leads</th>
+          <th data-col="inversion">Inversión</th>
+          <th data-col="cpl">CPL</th>
+          <th data-col="ventas">Ventas</th>
+          <th data-col="conv">% Conv.</th>
+          <th data-col="lxv">Leads x Venta</th>
+          <th data-col="cac">CAC</th>
+          <th data-col="cash">Cash</th>
+          <th data-col="fact">Fact</th>
+          <th data-col="bcash">Beneficio Cash</th>
+          <th data-col="brev">Beneficio Revenue</th>
+          <th data-col="roasCash">ROAS Cash</th>
+          <th data-col="roasRev">ROAS Revenue</th>
         </tr>
       </thead>
-      <tbody id="adsetTableBody"></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- Tabla por ad -->
-<div class="table-section" style="padding-top:0">
-  <div class="table-title"><span>Desglose por Ad</span></div>
-  <div class="table-wrap">
-    <table id="adTable">
-      <thead>
-        <tr>
-          <th data-col="camp" data-table="ad">AD</th>
-          <th data-col="leads" data-table="ad">Leads</th>
-          <th data-col="inversion" data-table="ad">Inversión</th>
-          <th data-col="cpl" data-table="ad">CPL</th>
-          <th data-col="ventas" data-table="ad">Ventas</th>
-          <th data-col="conv" data-table="ad">% Conv.</th>
-          <th data-col="lxv" data-table="ad">Leads x Venta</th>
-          <th data-col="cac" data-table="ad">CAC</th>
-          <th data-col="cash" data-table="ad">Cash</th>
-          <th data-col="fact" data-table="ad">Fact</th>
-          <th data-col="bcash" data-table="ad">Beneficio Cash</th>
-          <th data-col="brev" data-table="ad">Beneficio Revenue</th>
-          <th data-col="roasCash" data-table="ad">ROAS Cash</th>
-          <th data-col="roasRev" data-table="ad">ROAS Revenue</th>
-        </tr>
-      </thead>
-      <tbody id="adTableBody"></tbody>
+      <tbody id="mainTableBody"></tbody>
     </table>
   </div>
 </div>
@@ -356,9 +317,8 @@ let activeRange = 'all', activeSource = 'all';
 let activeCampaign = 'all', activeAd = 'all';
 let dateFrom = null, dateTo = null;
 let leadsHasDate = false;
+let activeDim = 'campana'; // campana | adset | ad | fuente | ubicacion
 let sortCol = 'leads', sortDir = 'desc';
-let sortColAdset = 'leads', sortDirAdset = 'desc';
-let sortColAd = 'leads', sortDirAd = 'desc';
 
 // ── UTILS ──────────────────────────────────────────────────────────────
 function normStr(s) { return (s || '').replace(/\\\//g, '/').trim(); }
@@ -483,47 +443,50 @@ function filterMeta(from, to) {
   });
 }
 
-// ── CAMPAIGN BREAKDOWN ──────────────────────────────────────────────────
-function buildCampaignRows(leads, compradores, meta) {
-  // group leads by campaign
-  const leadsByCamp = {};
+// ── DIM CONFIG ───────────────────────────────────────────────────────────────
+const DIM_CONFIG = {
+  campana:   { label: 'Campaña',   leadKey: 'utm_campaign', compKey: 'CAMPANA',    metaKey: 'Nombre de la campaña' },
+  adset:     { label: 'Adset',     leadKey: 'utm_content',  compKey: 'ADSET',      metaKey: 'Nombre del conjunto de anuncios' },
+  ad:        { label: 'Ad',        leadKey: 'utm_term',     compKey: 'AD',         metaKey: 'Nombre del anuncio' },
+  fuente:    { label: 'Fuente',    leadKey: 'utm_source',   compKey: 'FUENTE',     metaKey: 'Plataforma' },
+  ubicacion: { label: 'Ubicación', leadKey: 'utm_medium',   compKey: 'UBICACION',  metaKey: 'Ubicación' },
+};
+
+// ── UNIFIED BREAKDOWN ────────────────────────────────────────────────────────
+function buildRows(dim, leads, compradores, meta) {
+  const cfg = DIM_CONFIG[dim];
+  const spend = r => parseNum(r['Importe gastado (ARS)'] || r['Importe gastado'] || 0);
+
+  const byLeads = {}, byComp = {}, byMeta = {};
+
   leads.forEach(r => {
-    const c = normStr(r['utm_campaign']) || 'Desconocido';
-    if (!leadsByCamp[c]) leadsByCamp[c] = 0;
-    leadsByCamp[c]++;
+    const k = normStr(r[cfg.leadKey]) || 'Sin atribuir';
+    byLeads[k] = (byLeads[k] || 0) + 1;
   });
 
-  // group compradores by campaign
-  const compByCamp = {};
   compradores.forEach(r => {
-    const c = normStr(r['CAMPANA'] || r['utm_campaign'] || '') || 'Desconocido';
-    if (!compByCamp[c]) compByCamp[c] = { ventas: 0, cash: 0, fact: 0 };
-    compByCamp[c].ventas++;
-    compByCamp[c].cash += parseNum(r['Neto'] || 0);
-    compByCamp[c].fact += parseNum(r['Facturación Bruta'] || 0);
+    const k = normStr(r[cfg.compKey]) || 'Sin atribuir';
+    if (!byComp[k]) byComp[k] = { ventas: 0, cash: 0, fact: 0 };
+    byComp[k].ventas++;
+    byComp[k].cash += parseNum(r['Neto'] || 0);
+    byComp[k].fact += parseNum(r['Facturación Bruta'] || 0);
   });
 
-  // group meta by campaign
-  const metaByCamp = {};
   meta.forEach(r => {
-    const c = normStr(r['Nombre de la campaña'] || '') || 'Desconocido';
-    if (!metaByCamp[c]) metaByCamp[c] = 0;
-    metaByCamp[c] += parseNum(r['Importe gastado (ARS)'] || r['Importe gastado'] || 0);
+    const k = normStr(r[cfg.metaKey]) || 'Sin atribuir';
+    byMeta[k] = (byMeta[k] || 0) + spend(r);
   });
 
-  const allCamps = [...new Set([
-    ...Object.keys(leadsByCamp),
-    ...Object.keys(compByCamp),
-    ...Object.keys(metaByCamp),
-  ])].filter(c => !isTemplate(c));
+  const allKeys = [...new Set([
+    ...Object.keys(byLeads),
+    ...Object.keys(byComp),
+    ...Object.keys(byMeta),
+  ])].filter(k => !isTemplate(k));
 
-  return allCamps.map(camp => {
-    const l  = leadsByCamp[camp]  || 0;
-    const cv = compByCamp[camp]   || { ventas: 0, cash: 0, fact: 0 };
-    const inv = metaByCamp[camp]  || 0;
-
-    // try to match partial campaign names between meta and leads
-    // Meta campaigns may include the full name, leads utm_campaign too
+  return allKeys.map(key => {
+    const l   = byLeads[key] || 0;
+    const cv  = byComp[key]  || { ventas: 0, cash: 0, fact: 0 };
+    const inv = byMeta[key]  || 0;
     const cpl      = l > 0 && inv > 0 ? inv / l : null;
     const conv     = l > 0 ? (cv.ventas / l * 100) : null;
     const lxv      = cv.ventas > 0 ? l / cv.ventas : null;
@@ -532,100 +495,7 @@ function buildCampaignRows(leads, compradores, meta) {
     const brev     = cv.fact - inv;
     const roasCash = inv > 0 ? cv.cash / inv : null;
     const roasRev  = inv > 0 ? cv.fact / inv : null;
-
-    return { camp, leads: l, inversion: inv, cpl, ventas: cv.ventas, conv, lxv, cac,
-             cash: cv.cash, fact: cv.fact, bcash, brev, roasCash, roasRev };
-  });
-}
-
-// ── ADSET BREAKDOWN ──────────────────────────────────────────────────────
-function buildAdsetRows(leads, compradores, meta) {
-  const leadsByAdset = {};
-  leads.forEach(r => {
-    const a = normStr(r['utm_content']) || 'Desconocido';
-    leadsByAdset[a] = (leadsByAdset[a] || 0) + 1;
-  });
-
-  const compByAdset = {};
-  compradores.forEach(r => {
-    const a = normStr(r['ADSET'] || '') || 'Desconocido';
-    if (!compByAdset[a]) compByAdset[a] = { ventas: 0, cash: 0, fact: 0 };
-    compByAdset[a].ventas++;
-    compByAdset[a].cash += parseNum(r['Neto'] || 0);
-    compByAdset[a].fact += parseNum(r['Facturación Bruta'] || 0);
-  });
-
-  const metaByAdset = {};
-  meta.forEach(r => {
-    const a = normStr(r['Nombre del conjunto de anuncios'] || '') || 'Desconocido';
-    metaByAdset[a] = (metaByAdset[a] || 0) + parseNum(r['Importe gastado (ARS)'] || r['Importe gastado'] || 0);
-  });
-
-  const allAdsets = [...new Set([
-    ...Object.keys(leadsByAdset),
-    ...Object.keys(compByAdset),
-    ...Object.keys(metaByAdset),
-  ])].filter(a => !isTemplate(a));
-
-  return allAdsets.map(adset => {
-    const l   = leadsByAdset[adset]  || 0;
-    const cv  = compByAdset[adset]   || { ventas: 0, cash: 0, fact: 0 };
-    const inv = metaByAdset[adset]   || 0;
-    const cpl      = l > 0 && inv > 0 ? inv / l : null;
-    const conv     = l > 0 ? (cv.ventas / l * 100) : null;
-    const lxv      = cv.ventas > 0 ? l / cv.ventas : null;
-    const cac      = cv.ventas > 0 && inv > 0 ? inv / cv.ventas : null;
-    const bcash    = cv.cash - inv;
-    const brev     = cv.fact - inv;
-    const roasCash = inv > 0 ? cv.cash / inv : null;
-    const roasRev  = inv > 0 ? cv.fact / inv : null;
-    return { camp: adset, leads: l, inversion: inv, cpl, ventas: cv.ventas, conv, lxv, cac,
-             cash: cv.cash, fact: cv.fact, bcash, brev, roasCash, roasRev };
-  });
-}
-
-// ── AD BREAKDOWN ────────────────────────────────────────────────────────────
-function buildAdRows(leads, compradores, meta) {
-  const leadsByAd = {};
-  leads.forEach(r => {
-    const a = normStr(r['utm_term']) || 'Desconocido';
-    leadsByAd[a] = (leadsByAd[a] || 0) + 1;
-  });
-
-  const compByAd = {};
-  compradores.forEach(r => {
-    const a = normStr(r['AD'] || '') || 'Desconocido';
-    if (!compByAd[a]) compByAd[a] = { ventas: 0, cash: 0, fact: 0 };
-    compByAd[a].ventas++;
-    compByAd[a].cash += parseNum(r['Neto'] || 0);
-    compByAd[a].fact += parseNum(r['Facturación Bruta'] || 0);
-  });
-
-  const metaByAd = {};
-  meta.forEach(r => {
-    const a = normStr(r['Nombre del anuncio'] || '') || 'Desconocido';
-    metaByAd[a] = (metaByAd[a] || 0) + parseNum(r['Importe gastado (ARS)'] || r['Importe gastado'] || 0);
-  });
-
-  const allAds = [...new Set([
-    ...Object.keys(leadsByAd),
-    ...Object.keys(compByAd),
-    ...Object.keys(metaByAd),
-  ])].filter(a => !isTemplate(a));
-
-  return allAds.map(ad => {
-    const l   = leadsByAd[ad]  || 0;
-    const cv  = compByAd[ad]   || { ventas: 0, cash: 0, fact: 0 };
-    const inv = metaByAd[ad]   || 0;
-    const cpl      = l > 0 && inv > 0 ? inv / l : null;
-    const conv     = l > 0 ? (cv.ventas / l * 100) : null;
-    const lxv      = cv.ventas > 0 ? l / cv.ventas : null;
-    const cac      = cv.ventas > 0 && inv > 0 ? inv / cv.ventas : null;
-    const bcash    = cv.cash - inv;
-    const brev     = cv.fact - inv;
-    const roasCash = inv > 0 ? cv.cash / inv : null;
-    const roasRev  = inv > 0 ? cv.fact / inv : null;
-    return { camp: ad, leads: l, inversion: inv, cpl, ventas: cv.ventas, conv, lxv, cac,
+    return { camp: key, leads: l, inversion: inv, cpl, ventas: cv.ventas, conv, lxv, cac,
              cash: cv.cash, fact: cv.fact, bcash, brev, roasCash, roasRev };
   });
 }
@@ -698,36 +568,34 @@ function render() {
   s('kpi-periodo', periodo);
 
   // Campaign table
-  const rows = buildCampaignRows(leads, comp, meta);
-  renderTable(rows, totalLeads, totalVentas, totalInv, totalCash, totalFact, 'campTableBody', '#campTable thead th', sortCol, sortDir);
+  // Update tab first-column label
+  const cfg = DIM_CONFIG[activeDim];
+  document.querySelector('#mainTable thead th[data-col="camp"]').textContent = cfg.label;
 
-  const adsetRows = buildAdsetRows(leads, comp, meta);
-  renderTable(adsetRows, totalLeads, totalVentas, totalInv, totalCash, totalFact, 'adsetTableBody', '#adsetTable thead th', sortColAdset, sortDirAdset);
-
-  const adRows = buildAdRows(leads, comp, meta);
-  renderTable(adRows, totalLeads, totalVentas, totalInv, totalCash, totalFact, 'adTableBody', '#adTable thead th', sortColAd, sortDirAd);
+  const rows = buildRows(activeDim, leads, comp, meta);
+  renderTable(rows, totalLeads, totalVentas, totalInv, totalCash, totalFact);
 
 }
 
 // ── TABLE RENDER ────────────────────────────────────────────────────────
 let tableRows = [];
 
-function renderTable(rows, tL, tV, tInv, tCash, tFact, tbodyId, thSelector, sCol, sDir) {
+function renderTable(rows, tL, tV, tInv, tCash, tFact) {
   // sort
-  const dir = sDir === 'asc' ? 1 : -1;
+  const dir = sortDir === 'asc' ? 1 : -1;
   const sorted = [...rows].sort((a, b) => {
-    const av = a[sCol], bv = b[sCol];
-    if (sCol === 'camp') return dir * String(av).localeCompare(String(bv));
+    const av = a[sortCol], bv = b[sortCol];
+    if (sortCol === 'camp') return dir * String(av).localeCompare(String(bv));
     return dir * ((av ?? -Infinity) - (bv ?? -Infinity));
   });
 
   // update sort indicators
-  document.querySelectorAll(thSelector).forEach(th => {
+  document.querySelectorAll('#mainTable thead th').forEach(th => {
     th.classList.remove('sort-asc', 'sort-desc');
-    if (th.dataset.col === sCol) th.classList.add(sDir === 'asc' ? 'sort-asc' : 'sort-desc');
+    if (th.dataset.col === sortCol) th.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
   });
 
-  const tbody = document.getElementById(tbodyId);
+  const tbody = document.getElementById('mainTableBody');
   tbody.innerHTML = '';
 
   sorted.forEach(r => {
@@ -843,32 +711,24 @@ document.getElementById('dateTo').addEventListener('change', e => {
 document.getElementById('btnRefresh').addEventListener('click', loadData);
 
 // Table sort
-document.querySelectorAll('#campTable thead th').forEach(th => {
+// Tab switching
+document.querySelectorAll('.btn-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeDim = btn.dataset.dim;
+    sortCol = 'leads'; sortDir = 'desc'; // reset sort on tab change
+    render();
+  });
+});
+
+// Table column sort
+document.querySelectorAll('#mainTable thead th').forEach(th => {
   th.addEventListener('click', () => {
     const col = th.dataset.col;
     if (!col) return;
     if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
     else { sortCol = col; sortDir = col === 'camp' ? 'asc' : 'desc'; }
-    render();
-  });
-});
-
-document.querySelectorAll('#adsetTable thead th').forEach(th => {
-  th.addEventListener('click', () => {
-    const col = th.dataset.col;
-    if (!col) return;
-    if (sortColAdset === col) { sortDirAdset = sortDirAdset === 'asc' ? 'desc' : 'asc'; }
-    else { sortColAdset = col; sortDirAdset = col === 'camp' ? 'asc' : 'desc'; }
-    render();
-  });
-});
-
-document.querySelectorAll('#adTable thead th').forEach(th => {
-  th.addEventListener('click', () => {
-    const col = th.dataset.col;
-    if (!col) return;
-    if (sortColAd === col) { sortDirAd = sortDirAd === 'asc' ? 'desc' : 'asc'; }
-    else { sortColAd = col; sortDirAd = col === 'camp' ? 'asc' : 'desc'; }
     render();
   });
 });
