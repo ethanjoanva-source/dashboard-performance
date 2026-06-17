@@ -500,9 +500,11 @@ const UBICACION_NORM = {
   utm_medium:              'Sin atribuir',
 };
 
+const GENERIC_INVALID = new Set(['#n/a', '#n/d', '#error!', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']);
+
 function normKey(dim, raw) {
   const s = (raw || '').trim();
-  if (!s) return 'Sin atribuir';
+  if (!s || GENERIC_INVALID.has(s.toLowerCase())) return 'Sin atribuir';
   if (dim === 'fuente')    return FUENTE_NORM[s.toLowerCase()] || s;
   if (dim === 'ubicacion') return UBICACION_NORM[s.toLowerCase()] || s;
   return s;
