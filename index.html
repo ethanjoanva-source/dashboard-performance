@@ -203,6 +203,7 @@
       text-transform: uppercase; letter-spacing: .8px; margin-bottom: 10px;
     }
     .chart-canvas-wrap { position: relative; }
+    .chart-card-wide { grid-column: span 2; }
     .legend-dot   { width: 9px; height: 9px; border-radius: 2px; }
   </style>
 </head>
@@ -708,46 +709,124 @@ function renderCharts(rows) {
     yellow: 'rgba(245,158,11,0.85)',
   };
 
+  const shortLabels = sorted.map(r => truncLabel(r.camp, 14));
+
   const DEFS = [
-    { title: 'Leads',          kind: 'donut', data: sorted.map(r => r.leads),           colors: segColors,  fmt: v => fmtN(v) },
-    { title: 'Ventas',         kind: 'donut', data: sorted.map(r => r.ventas),          colors: segColors,  fmt: v => fmtN(v) },
-    { title: 'Inversión',      kind: 'bar',   data: sorted.map(r => r.inversion),       color: C.orange,    fmt: v => '$' + fmtN(v) },
-    { title: 'CPL',            kind: 'bar',   data: sorted.map(r => r.cpl   || 0),      color: C.orange,    fmt: v => '$' + fmtN(v) },
-    { title: 'CAC',            kind: 'bar',   data: sorted.map(r => r.cac   || 0),      color: C.orange,    fmt: v => '$' + fmtN(v) },
-    { title: 'ROAS Cash',      kind: 'bar',   data: sorted.map(r => r.roasCash || 0),   color: C.yellow,    fmt: v => fmtN(v,2) + 'x' },
-    { title: 'Cash',           kind: 'donut', data: sorted.map(r => r.cash),            colors: segColors,  fmt: v => '$' + fmtN(v) },
-    { title: 'Facturación',    kind: 'donut', data: sorted.map(r => r.fact),            colors: segColors,  fmt: v => '$' + fmtN(v) },
-    { title: 'Beneficio Cash', kind: 'donut', data: sorted.map(r => Math.abs(r.bcash)), colors: benColors,  fmt: (v, i) => '$' + fmtN(sorted[i]?.bcash ?? v), realData: sorted.map(r => r.bcash) },
+    { title: 'Leads',              kind: 'donut', data: sorted.map(r => r.leads),           colors: segColors,  fmt: v => fmtN(v) },
+    { title: 'Ventas',             kind: 'donut', data: sorted.map(r => r.ventas),          colors: segColors,  fmt: v => fmtN(v) },
+    { title: 'Inversión + CPL',    kind: 'combo',
+      invData: sorted.map(r => r.inversion),
+      cplData: sorted.map(r => r.cpl || 0) },
+    { title: 'CAC',                kind: 'bar',   data: sorted.map(r => r.cac   || 0),      color: C.orange,    fmt: v => '$' + fmtN(v) },
+    { title: 'ROAS Cash',          kind: 'bar',   data: sorted.map(r => r.roasCash || 0),   color: C.yellow,    fmt: v => fmtN(v,2) + 'x' },
+    { title: 'Cash',               kind: 'donut', data: sorted.map(r => r.cash),            colors: segColors,  fmt: v => '$' + fmtN(v) },
+    { title: 'Facturación',        kind: 'donut', data: sorted.map(r => r.fact),            colors: segColors,  fmt: v => '$' + fmtN(v) },
+    { title: 'Beneficio Cash',     kind: 'donut', data: sorted.map(r => Math.abs(r.bcash)), colors: benColors,  fmt: (v, i) => '$' + fmtN(sorted[i]?.bcash ?? v), realData: sorted.map(r => r.bcash) },
   ];
 
-  const barH  = Math.max(180, n * 34 + 48) + 'px';
+  const barH   = Math.max(180, n * 34 + 48) + 'px';
   const donutH = '300px';
+  const comboH = '280px';
 
   const tooltipBase = {
     backgroundColor: '#1e1e1e', borderColor: '#333', borderWidth: 1,
     titleColor: '#aaa', bodyColor: '#fff', padding: 10,
   };
 
-  const xTickFmt = v => {
+  const yTickFmt = v => {
     const abs = Math.abs(v);
     if (abs >= 1e6) return (v / 1e6).toFixed(1) + 'M';
     if (abs >= 1e3) return (v / 1e3).toFixed(0) + 'K';
     return fmtN(v, 0);
   };
 
+  const heightOf = d => d.kind === 'donut' ? donutH : d.kind === 'combo' ? comboH : barH;
+
   grid.innerHTML = DEFS.map((d, i) => `
-    <div class="chart-card">
+    <div class="chart-card${d.kind === 'combo' ? ' chart-card-wide' : ''}">
       <div class="chart-card-title">${d.title}</div>
-      <div class="chart-canvas-wrap" style="height:${d.kind === 'donut' ? donutH : barH}">
+      <div class="chart-canvas-wrap" style="height:${heightOf(d)}">
         <canvas id="ch${i}"></canvas>
       </div>
     </div>`).join('');
 
   DEFS.forEach((d, i) => {
-    const realData = d.realData || d.data;
-    const chart = new Chart(document.getElementById('ch' + i),
-      d.kind === 'donut'
-      ? {
+    let cfg;
+
+    if (d.kind === 'combo') {
+      cfg = {
+        type: 'bar',
+        data: {
+          labels: shortLabels,
+          datasets: [
+            {
+              type: 'bar',
+              label: 'Inversión',
+              data: d.invData,
+              backgroundColor: 'rgba(249,115,22,0.80)',
+              borderRadius: 5,
+              borderSkipped: false,
+              yAxisID: 'yInv',
+              order: 2,
+            },
+            {
+              type: 'line',
+              label: 'CPL',
+              data: d.cplData,
+              borderColor: '#6c8fff',
+              backgroundColor: 'rgba(108,143,255,0.12)',
+              borderWidth: 2.5,
+              pointBackgroundColor: '#6c8fff',
+              pointBorderColor: '#0f0f0f',
+              pointBorderWidth: 1.5,
+              pointRadius: 5,
+              pointHoverRadius: 7,
+              fill: false,
+              tension: 0.35,
+              yAxisID: 'yCpl',
+              order: 1,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: {
+              display: true,
+              labels: { color: '#bbb', font: { size: 11 }, boxWidth: 12, usePointStyle: true, pointStyleWidth: 10 }
+            },
+            tooltip: {
+              ...tooltipBase,
+              callbacks: {
+                label: ctx => ctx.dataset.label === 'Inversión'
+                  ? '  Inversión: $' + fmtN(ctx.raw)
+                  : '  CPL: $' + fmtN(ctx.raw)
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255,255,255,0.04)' },
+              ticks: { color: '#ccc', font: { size: 10 }, maxRotation: 30, minRotation: 0 }
+            },
+            yInv: {
+              type: 'linear', position: 'left',
+              grid: { color: 'rgba(255,255,255,0.04)' },
+              ticks: { color: '#f97316', font: { size: 10 }, callback: yTickFmt }
+            },
+            yCpl: {
+              type: 'linear', position: 'right',
+              grid: { drawOnChartArea: false },
+              ticks: { color: '#6c8fff', font: { size: 10 }, callback: v => '$' + fmtN(v) }
+            }
+          }
+        }
+      };
+
+    } else if (d.kind === 'donut') {
+      cfg = {
           type: 'doughnut',
           data: {
             labels,
@@ -778,8 +857,10 @@ function renderCharts(rows) {
               }
             }
           }
-        }
-      : {
+        };
+
+    } else {
+      cfg = {
           type: 'bar',
           data: {
             labels,
@@ -802,12 +883,14 @@ function renderCharts(rows) {
               }
             },
             scales: {
-              x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#555', font: { size: 10 }, callback: xTickFmt } },
+              x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#555', font: { size: 10 }, callback: yTickFmt } },
               y: { grid: { display: false }, ticks: { color: '#ccc', font: { size: 11 } } }
             }
           }
-        }
-    );
+        };
+    }
+
+    const chart = new Chart(document.getElementById('ch' + i), cfg);
     chartInstances.push(chart);
   });
 }
