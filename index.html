@@ -474,6 +474,21 @@ const DIM_CONFIG = {
 };
 
 // ── UNIFIED BREAKDOWN ────────────────────────────────────────────────────────
+const FUENTE_NORM = {
+  fb: 'Facebook', facebook: 'Facebook', meta: 'Facebook',
+  ig: 'Instagram', instagram: 'Instagram',
+  setting: 'Setting', ig_bio: 'Setting', linktree: 'Setting',
+  referidos: 'Referidos', referral: 'Referidos', ref: 'Referidos',
+  direct: 'Direct',
+};
+
+function normKey(dim, raw) {
+  const s = (raw || '').trim();
+  if (!s) return 'Sin atribuir';
+  if (dim === 'fuente') return FUENTE_NORM[s.toLowerCase()] || s;
+  return s;
+}
+
 function buildRows(dim, leads, compradores, meta) {
   const cfg = DIM_CONFIG[dim];
   const spend = r => parseNum(r['Importe gastado (ARS)'] || r['Importe gastado'] || 0);
@@ -481,12 +496,12 @@ function buildRows(dim, leads, compradores, meta) {
   const byLeads = {}, byComp = {}, byMeta = {};
 
   leads.forEach(r => {
-    const k = normStr(r[cfg.leadKey]) || 'Sin atribuir';
+    const k = normKey(dim, normStr(r[cfg.leadKey])) || 'Sin atribuir';
     byLeads[k] = (byLeads[k] || 0) + 1;
   });
 
   compradores.forEach(r => {
-    const k = normStr(r[cfg.compKey]) || 'Sin atribuir';
+    const k = normKey(dim, normStr(r[cfg.compKey])) || 'Sin atribuir';
     if (!byComp[k]) byComp[k] = { ventas: 0, cash: 0, fact: 0 };
     byComp[k].ventas++;
     byComp[k].cash += parseNum(r['Neto'] || 0);
@@ -494,7 +509,7 @@ function buildRows(dim, leads, compradores, meta) {
   });
 
   meta.forEach(r => {
-    const k = normStr(r[cfg.metaKey]) || 'Sin atribuir';
+    const k = normKey(dim, normStr(r[cfg.metaKey])) || 'Sin atribuir';
     byMeta[k] = (byMeta[k] || 0) + spend(r);
   });
 
