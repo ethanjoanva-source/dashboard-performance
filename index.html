@@ -692,37 +692,41 @@ function renderCharts(rows) {
   const sorted = [...rows].sort((a, b) => (b.leads || 0) - (a.leads || 0)).slice(0, TOP);
   const labels = sorted.map(r => truncLabel(r.camp));
   const n = sorted.length;
-  const h = Math.max(180, n * 34 + 48) + 'px';
+
+  // Color palette for doughnut segments
+  const PALETTE = [
+    '#6c8fff','#3ecf8e','#f59e0b','#a78bfa','#f97316',
+    '#ec4899','#14b8a6','#fb923c','#34d399','#60a5fa',
+  ];
+  const segColors = PALETTE.slice(0, n);
+
+  // Beneficio: green for positive, red for negative
+  const benColors = sorted.map(r => r.bcash >= 0 ? '#3ecf8e' : '#f87171');
 
   const C = {
-    blue:   'rgba(108,143,255,0.82)',
-    green:  'rgba(62,207,142,0.82)',
-    green2: 'rgba(62,207,142,0.55)',
     orange: 'rgba(249,115,22,0.82)',
     yellow: 'rgba(245,158,11,0.85)',
-    red:    'rgba(248,113,113,0.85)',
   };
 
   const DEFS = [
-    { title: 'Leads',          data: sorted.map(r => r.leads),         color: C.blue,   fmt: v => fmtN(v) },
-    { title: 'Ventas',         data: sorted.map(r => r.ventas),        color: C.green,  fmt: v => fmtN(v) },
-    { title: 'Inversión',      data: sorted.map(r => r.inversion),     color: C.orange, fmt: v => '$' + fmtN(v) },
-    { title: 'CPL',            data: sorted.map(r => r.cpl   || 0),    color: C.orange, fmt: v => '$' + fmtN(v) },
-    { title: 'CAC',            data: sorted.map(r => r.cac   || 0),    color: C.orange, fmt: v => '$' + fmtN(v) },
-    { title: 'ROAS Cash',      data: sorted.map(r => r.roasCash || 0), color: C.yellow, fmt: v => fmtN(v,2) + 'x' },
-    { title: 'Cash',           data: sorted.map(r => r.cash),          color: C.green,  fmt: v => '$' + fmtN(v) },
-    { title: 'Facturación',    data: sorted.map(r => r.fact),          color: C.green2, fmt: v => '$' + fmtN(v) },
-    { title: 'Beneficio Cash', data: sorted.map(r => r.bcash),
-      color: sorted.map(r => r.bcash >= 0 ? C.green : C.red),          fmt: v => '$' + fmtN(v) },
+    { title: 'Leads',          kind: 'donut', data: sorted.map(r => r.leads),           colors: segColors,  fmt: v => fmtN(v) },
+    { title: 'Ventas',         kind: 'donut', data: sorted.map(r => r.ventas),          colors: segColors,  fmt: v => fmtN(v) },
+    { title: 'Inversión',      kind: 'bar',   data: sorted.map(r => r.inversion),       color: C.orange,    fmt: v => '$' + fmtN(v) },
+    { title: 'CPL',            kind: 'bar',   data: sorted.map(r => r.cpl   || 0),      color: C.orange,    fmt: v => '$' + fmtN(v) },
+    { title: 'CAC',            kind: 'bar',   data: sorted.map(r => r.cac   || 0),      color: C.orange,    fmt: v => '$' + fmtN(v) },
+    { title: 'ROAS Cash',      kind: 'bar',   data: sorted.map(r => r.roasCash || 0),   color: C.yellow,    fmt: v => fmtN(v,2) + 'x' },
+    { title: 'Cash',           kind: 'donut', data: sorted.map(r => r.cash),            colors: segColors,  fmt: v => '$' + fmtN(v) },
+    { title: 'Facturación',    kind: 'donut', data: sorted.map(r => r.fact),            colors: segColors,  fmt: v => '$' + fmtN(v) },
+    { title: 'Beneficio Cash', kind: 'donut', data: sorted.map(r => Math.abs(r.bcash)), colors: benColors,  fmt: (v, i) => '$' + fmtN(sorted[i]?.bcash ?? v), realData: sorted.map(r => r.bcash) },
   ];
 
-  grid.innerHTML = DEFS.map((d, i) => `
-    <div class="chart-card">
-      <div class="chart-card-title">${d.title}</div>
-      <div class="chart-canvas-wrap" style="height:${h}">
-        <canvas id="ch${i}"></canvas>
-      </div>
-    </div>`).join('');
+  const barH  = Math.max(180, n * 34 + 48) + 'px';
+  const donutH = '300px';
+
+  const tooltipBase = {
+    backgroundColor: '#1e1e1e', borderColor: '#333', borderWidth: 1,
+    titleColor: '#aaa', bodyColor: '#fff', padding: 10,
+  };
 
   const xTickFmt = v => {
     const abs = Math.abs(v);
@@ -731,47 +735,79 @@ function renderCharts(rows) {
     return fmtN(v, 0);
   };
 
+  grid.innerHTML = DEFS.map((d, i) => `
+    <div class="chart-card">
+      <div class="chart-card-title">${d.title}</div>
+      <div class="chart-canvas-wrap" style="height:${d.kind === 'donut' ? donutH : barH}">
+        <canvas id="ch${i}"></canvas>
+      </div>
+    </div>`).join('');
+
   DEFS.forEach((d, i) => {
-    const bgColors = Array.isArray(d.color) ? d.color : Array(n).fill(d.color);
-    const chart = new Chart(document.getElementById('ch' + i), {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [{
-          data: d.data,
-          backgroundColor: bgColors,
-          borderRadius: 5,
-          borderSkipped: false,
-        }]
-      },
-      options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#1e1e1e',
-            borderColor: '#333',
-            borderWidth: 1,
-            titleColor: '#aaa',
-            bodyColor: '#fff',
-            padding: 10,
-            callbacks: { label: ctx => '  ' + d.fmt(ctx.raw) }
-          }
-        },
-        scales: {
-          x: {
-            grid: { color: 'rgba(255,255,255,0.04)' },
-            ticks: { color: '#555', font: { size: 10 }, callback: xTickFmt }
+    const realData = d.realData || d.data;
+    const chart = new Chart(document.getElementById('ch' + i),
+      d.kind === 'donut'
+      ? {
+          type: 'doughnut',
+          data: {
+            labels,
+            datasets: [{
+              data: d.data,
+              backgroundColor: d.colors,
+              borderColor: '#0f0f0f',
+              borderWidth: 3,
+              hoverOffset: 6,
+            }]
           },
-          y: {
-            grid: { display: false },
-            ticks: { color: '#ccc', font: { size: 11 } }
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            plugins: {
+              legend: {
+                display: true,
+                position: 'bottom',
+                labels: {
+                  color: '#bbb', font: { size: 10 },
+                  padding: 8, boxWidth: 10, boxHeight: 10, usePointStyle: true,
+                }
+              },
+              tooltip: {
+                ...tooltipBase,
+                callbacks: { label: ctx => '  ' + d.fmt(ctx.raw, ctx.dataIndex) }
+              }
+            }
           }
         }
-      }
-    });
+      : {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [{
+              data: d.data,
+              backgroundColor: Array(n).fill(d.color),
+              borderRadius: 5,
+              borderSkipped: false,
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                ...tooltipBase,
+                callbacks: { label: ctx => '  ' + d.fmt(ctx.raw) }
+              }
+            },
+            scales: {
+              x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#555', font: { size: 10 }, callback: xTickFmt } },
+              y: { grid: { display: false }, ticks: { color: '#ccc', font: { size: 11 } } }
+            }
+          }
+        }
+    );
     chartInstances.push(chart);
   });
 }
