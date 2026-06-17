@@ -717,8 +717,8 @@ function renderCharts(rows) {
     { title: 'Inversión + CPL',    kind: 'combo',
       invData: sorted.map(r => r.inversion),
       cplData: sorted.map(r => r.cpl || 0) },
-    { title: 'CAC',                kind: 'bar',   data: sorted.map(r => r.cac   || 0),      color: C.orange,    fmt: v => '$' + fmtN(v) },
-    { title: 'ROAS Cash',          kind: 'bar',   data: sorted.map(r => r.roasCash || 0),   color: C.yellow,    fmt: v => fmtN(v,2) + 'x' },
+    { title: 'CAC',                kind: 'vbar',  data: sorted.map(r => r.cac   || 0),      color: C.orange,    fmt: v => '$' + fmtN(v) },
+    { title: 'ROAS Cash',          kind: 'vbar',  data: sorted.map(r => r.roasCash || 0),   color: C.yellow,    fmt: v => fmtN(v,2) + 'x' },
     { title: 'Cash',               kind: 'donut', data: sorted.map(r => r.cash),            colors: segColors,  fmt: v => '$' + fmtN(v) },
     { title: 'Facturación',        kind: 'donut', data: sorted.map(r => r.fact),            colors: segColors,  fmt: v => '$' + fmtN(v) },
     { title: 'Beneficio Cash',     kind: 'donut', data: sorted.map(r => Math.abs(r.bcash)), colors: benColors,  fmt: (v, i) => '$' + fmtN(sorted[i]?.bcash ?? v), realData: sorted.map(r => r.bcash) },
@@ -740,7 +740,7 @@ function renderCharts(rows) {
     return fmtN(v, 0);
   };
 
-  const heightOf = d => d.kind === 'donut' ? donutH : d.kind === 'combo' ? comboH : barH;
+  const heightOf = d => d.kind === 'donut' ? donutH : (d.kind === 'combo' || d.kind === 'vbar') ? comboH : barH;
 
   grid.innerHTML = DEFS.map((d, i) => `
     <div class="chart-card${d.kind === 'combo' ? ' chart-card-wide' : ''}">
@@ -855,6 +855,35 @@ function renderCharts(rows) {
                 ...tooltipBase,
                 callbacks: { label: ctx => '  ' + d.fmt(ctx.raw, ctx.dataIndex) }
               }
+            }
+          }
+        };
+
+    } else if (d.kind === 'vbar') {
+      cfg = {
+          type: 'bar',
+          data: {
+            labels: shortLabels,
+            datasets: [{
+              data: d.data,
+              backgroundColor: Array(n).fill(d.color),
+              borderRadius: 5,
+              borderSkipped: false,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                ...tooltipBase,
+                callbacks: { label: ctx => '  ' + d.fmt(ctx.raw) }
+              }
+            },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: '#ccc', font: { size: 10 }, maxRotation: 30 } },
+              y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#555', font: { size: 10 }, callback: yTickFmt } }
             }
           }
         };
