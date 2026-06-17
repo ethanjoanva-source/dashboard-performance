@@ -293,6 +293,7 @@ const SOURCE_MAP = {
 
 // ── STATE ──────────────────────────────────────────────────────────────
 let rawLeads = [], rawCompradores = [], rawMeta = [];
+let rawCompAgg = null;
 let activeRange = 'all', activeSource = 'all';
 let activeCampaign = 'all', activeAd = 'all';
 let dateFrom = null, dateTo = null;
@@ -369,6 +370,14 @@ async function fetchSheet(name) {
   const res = await fetch(BASE_URL + encodeURIComponent(name) + '&tq=select%20*');
   if (!res.ok) throw new Error(`No se pudo cargar "${name}" (${res.status})`);
   return Papa.parse(await res.text(), { header: true, skipEmptyLines: true }).data;
+}
+
+async function fetchAggregate(sheetName, tq) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}&tq=${encodeURIComponent(tq)}`;
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  const rows = Papa.parse(await res.text(), { header: true, skipEmptyLines: true }).data;
+  return rows[0] || null;
 }
 
 // ── FILTER ──────────────────────────────────────────────────────────────
@@ -509,10 +518,12 @@ function render() {
   const meta       = filterMeta(from, to);
 
   const totalLeads = leads.length;
-  const totalVentas = comp.length;
   const totalInv  = meta.reduce((s, r) => s + parseNum(r['Importe gastado (ARS)'] || r['Importe gastado'] || 0), 0);
-  const totalCash = comp.reduce((s, r) => s + parseNum(r['Neto'] || 0), 0);
-  const totalFact = comp.reduce((s, r) => s + parseNum(r['Facturación Bruta'] || 0), 0);
+
+  const noFilters = activeCampaign === 'all' && activeAd === 'all' && activeRange === 'all';
+  const totalVentas = noFilters && rawCompAgg ? parseInt(rawCompAgg['count Nombre'] || 0)                     : comp.length;
+  const totalCash   = noFilters && rawCompAgg ? parseFloat(rawCompAgg['sum Neto'] || 0)                       : comp.reduce((s, r) => s + parseNum(r['Neto'] || 0), 0);
+  const totalFact   = noFilters && rawCompAgg ? parseFloat(rawCompAgg['sum Facturación Bruta'] || 0)          : comp.reduce((s, r) => s + parseNum(r['Facturación Bruta'] || 0), 0);
 
   const cpl      = totalLeads > 0 && totalInv > 0 ? totalInv / totalLeads : null;
   const conv     = totalLeads > 0 ? totalVentas / totalLeads * 100 : null;
@@ -634,8 +645,9 @@ async function loadData() {
   document.getElementById('loadingOverlay').style.display = 'flex';
   document.getElementById('errorBanner').style.display = 'none';
   try {
-    [rawLeads, rawCompradores, rawMeta] = await Promise.all([
-      fetchSheet('leads'), fetchSheet('compradores'), fetchSheet('meta')
+    [rawLeads, rawCompradores, rawMeta, rawCompAgg] = await Promise.all([
+      fetchSheet('leads'), fetchSheet('compradores'), fetchSheet('meta'),
+      fetchAggregate('compradores', 'select count(A), sum(D), sum(F)')
     ]);
 
     const sample = rawLeads[0] || {};
