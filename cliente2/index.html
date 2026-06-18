@@ -1024,7 +1024,7 @@ function renderTable(rows) {
     best[key] = { b, higher, thr };
   });
   const isBest = (key, val) => {
-    if (val == null || !best[key]) return false;
+    if (val == null || val === 0 || !best[key]) return false;
     const { b, higher, thr } = best[key];
     return higher ? val >= b - thr : val <= b + thr;
   };
