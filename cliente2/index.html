@@ -951,7 +951,7 @@ function render() {
 }
 
 // ── TABLE RENDER ────────────────────────────────────────────────────────
-function renderTable(rows, tL, tV, tInv, tCash, tFact) {
+function renderTable(rows) {
   const dir = sortDir === 'asc' ? 1 : -1;
   const sorted = [...rows].sort((a, b) => {
     const av = a[sortCol], bv = b[sortCol];
