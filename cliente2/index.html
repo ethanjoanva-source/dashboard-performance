@@ -121,7 +121,22 @@
     .color-pink   { color: var(--accent-pink); }
 
     .table-section { padding: 24px 28px 28px; }
-    .tab-bar { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+    .tab-bar { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+    .fuente-filter-bar {
+      display: none; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 14px;
+    }
+    .fuente-filter-bar.visible { display: flex; }
+    .btn-fuente {
+      background: rgba(255,255,255,0.04); border: 1px solid var(--card-border);
+      color: var(--text-muted); padding: 4px 12px; border-radius: 20px;
+      cursor: pointer; font-size: 11px; font-weight: 600; letter-spacing: .3px; transition: all .18s;
+    }
+    .btn-fuente:hover { border-color: var(--accent-cyan); color: var(--text); }
+    .btn-fuente.active {
+      background: linear-gradient(135deg, rgba(34,211,238,0.3), rgba(6,182,212,0.2));
+      border-color: var(--accent-cyan); color: #fff;
+      box-shadow: 0 0 10px rgba(34,211,238,0.2);
+    }
     .btn-tab {
       background: rgba(255,255,255,0.04); border: 1px solid var(--card-border);
       color: var(--text-muted); padding: 7px 18px; border-radius: 24px;
@@ -289,6 +304,14 @@
     <button class="btn-tab" data-dim="adMeta">Ad Meta</button>
     <button class="btn-tab" data-dim="adYt">Ad YouTube</button>
   </div>
+  <div class="fuente-filter-bar" id="fuenteFilterBar">
+    <button class="btn-fuente active" data-fuente="all">Todas</button>
+    <button class="btn-fuente" data-fuente="YouTube">YouTube</button>
+    <button class="btn-fuente" data-fuente="Instagram">Instagram</button>
+    <button class="btn-fuente" data-fuente="Facebook">Facebook</button>
+    <button class="btn-fuente" data-fuente="Orgánico">Orgánico</button>
+    <button class="btn-fuente" data-fuente="Afiliado">Afiliado</button>
+  </div>
   <div class="table-wrap">
     <table id="mainTable">
       <thead>
@@ -340,6 +363,7 @@ let rawVentPais = {};    // ventas pre-agregadas por País desde GViz
 let rawVentAdMeta = {};  // ventas por Ad desde rawVentas (todas las fuentes)
 let rawVentAdYt   = {};  // igual que rawVentAdMeta — el filtro lo hace allKeys
 let activeRange = 'all', activeSource = 'all';
+let activePaisFuente = 'all';
 let activeCampaign = 'all', activeAd = 'all';
 let dateFrom = null, dateTo = null;
 let leadsHasDate = false;
@@ -803,6 +827,10 @@ function buildRows(dim, leads, ventas, meta, youtube) {
         byLeads[k] = (byLeads[k] || 0) + 1;
         return;
       }
+      if (dim === 'pais' && activePaisFuente !== 'all') {
+        const fNorm = FUENTE_NORM[normStr(r['utm_source'] || '').toLowerCase()];
+        if (fNorm !== activePaisFuente) return;
+      }
       const k = destPais(normKey(dim, normStr(r[cfg.leadKey])) || 'Sin atribuir');
       byLeads[k] = (byLeads[k] || 0) + 1;
     });
@@ -815,13 +843,25 @@ function buildRows(dim, leads, ventas, meta, youtube) {
         byVent[cat] = { ventas: data.ventas, cash: data.cash, fact: data.fact };
       });
     } else if (dim === 'pais') {
-      Object.entries(rawVentPais).forEach(([pais, data]) => {
-        const dest = destPais(pais);
-        if (!byVent[dest]) byVent[dest] = { ventas: 0, cash: 0, fact: 0 };
-        byVent[dest].ventas += data.ventas;
-        byVent[dest].cash  += data.cash;
-        byVent[dest].fact  += data.fact;
-      });
+      if (activePaisFuente === 'all') {
+        Object.entries(rawVentPais).forEach(([pais, data]) => {
+          const dest = destPais(pais);
+          if (!byVent[dest]) byVent[dest] = { ventas: 0, cash: 0, fact: 0 };
+          byVent[dest].ventas += data.ventas;
+          byVent[dest].cash  += data.cash;
+          byVent[dest].fact  += data.fact;
+        });
+      } else {
+        ventas.forEach(r => {
+          const fNorm = FUENTE_NORM[normStr(r['Fuente'] || '').toLowerCase()];
+          if (fNorm !== activePaisFuente) return;
+          const dest = destPais(normKey('pais', normStr(r['País'] || '')) || 'Sin atribuir');
+          if (!byVent[dest]) byVent[dest] = { ventas: 0, cash: 0, fact: 0 };
+          byVent[dest].ventas++;
+          byVent[dest].cash += parseNum(r['Cash Collected'] || 0);
+          byVent[dest].fact += parseNum(r['Facturación'] || 0);
+        });
+      }
     } else if (dim === 'adMeta') {
       Object.entries(rawVentAdMeta).forEach(([ad, data]) => {
         const code = normAdCode(ad);
@@ -856,7 +896,17 @@ function buildRows(dim, leads, ventas, meta, youtube) {
   // Inversión por País desde hoja "paises" (Meta + YouTube combinados)
   if (dim === 'pais') {
     Object.entries(rawPaisesSpend).forEach(([pais, data]) => {
-      bySpend[pais] = (bySpend[pais] || 0) + data.metaSpend + data.ytSpend;
+      let spend;
+      if (activePaisFuente === 'YouTube') {
+        spend = data.ytSpend;
+      } else if (activePaisFuente === 'Facebook' || activePaisFuente === 'Instagram') {
+        spend = data.metaSpend;
+      } else if (activePaisFuente === 'all') {
+        spend = data.metaSpend + data.ytSpend;
+      } else {
+        spend = 0; // Orgánico, Afiliado: sin inversión pagada
+      }
+      bySpend[pais] = (bySpend[pais] || 0) + spend;
     });
   }
 
@@ -1359,6 +1409,23 @@ document.querySelectorAll('.btn-tab').forEach(btn => {
     btn.classList.add('active');
     activeDim = btn.dataset.dim;
     sortCol = 'leads'; sortDir = 'desc';
+    const fbar = document.getElementById('fuenteFilterBar');
+    if (activeDim === 'pais') {
+      fbar.classList.add('visible');
+    } else {
+      fbar.classList.remove('visible');
+      activePaisFuente = 'all';
+      document.querySelectorAll('.btn-fuente').forEach(b => b.classList.toggle('active', b.dataset.fuente === 'all'));
+    }
+    render();
+  });
+});
+
+document.querySelectorAll('.btn-fuente').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.btn-fuente').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activePaisFuente = btn.dataset.fuente;
     render();
   });
 });
