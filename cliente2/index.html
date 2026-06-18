@@ -512,14 +512,15 @@ const DIM_CONFIG = {
   adYt:   { label: 'Ad YouTube', leadKey: 'utm_term',   ventKey: 'Ad',        metaKey: null,                 ytKey: 'Nombre del anuncio',   skipMeta: true,  skipYt: false },
 };
 
-// Solo 5 categorías en Fuente: Meta | Orgánico | YouTube | Afiliado | Desconocido
+// Categorías en Fuente: Facebook | Instagram | YouTube | Orgánico | Afiliado | Desconocido
 const FUENTE_NORM = {
-  // Meta (Facebook + Instagram ads)
-  fb: 'Meta', facebook: 'Meta', meta: 'Meta',
-  ig: 'Meta', instagram: 'Meta',
-  facebook_mobile_reels: 'Meta', facebook_mobile_feed: 'Meta',
-  facebook_desktop_feed: 'Meta', facebook_profile_feed: 'Meta',
-  instagram_reels: 'Meta', instagram_feed: 'Meta', instagram_stories: 'Meta',
+  // Facebook
+  fb: 'Facebook', facebook: 'Facebook',
+  facebook_mobile_reels: 'Facebook', facebook_mobile_feed: 'Facebook',
+  facebook_desktop_feed: 'Facebook', facebook_profile_feed: 'Facebook',
+  // Instagram
+  ig: 'Instagram', instagram: 'Instagram',
+  instagram_reels: 'Instagram', instagram_feed: 'Instagram', instagram_stories: 'Instagram',
   // YouTube
   youtube: 'YouTube', yt: 'YouTube', pagoyoutube: 'YouTube',
   // Orgánico
