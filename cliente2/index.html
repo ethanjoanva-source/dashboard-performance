@@ -524,10 +524,8 @@ async function fetchVentasByPais() {
   } catch(e) { return {}; }
 }
 
-// Ventas agrupadas por Ad — usa rawVentas (ya cargado), sin fetch extra
-// Lee ventas del sheet agrupadas por Ad (sin filtro de Fuente).
-// El tab Ad Meta ya filtra por ads con gasto en Meta via allKeys.
-async function fetchVentasByAdMeta() {
+// Helper: parsea ventas sheet y agrupa por Ad filtrando por función de Fuente
+async function _fetchVentasByAd(fuenteMatch) {
   try {
     const res = await fetch(BASE_URL + encodeURIComponent('ventas') + '&tq=select%20*');
     if (!res.ok) return {};
@@ -536,11 +534,13 @@ async function fetchVentasByAdMeta() {
     if (hIdx < 0) return {};
     const headers = all[hIdx].map(h => (h || '').trim().toLowerCase());
     const adIdx   = headers.findIndex(h => h === 'ad');
+    const fIdx    = headers.findIndex(h => h === 'fuente');
     const cashIdx = headers.findIndex(h => h === 'cash collected');
     const factIdx = headers.findIndex(h => h.startsWith('factur'));
     if (adIdx < 0) return {};
     const result = {};
     all.slice(hIdx + 1).forEach(r => {
+      if (fIdx >= 0 && !fuenteMatch((r[fIdx] || '').toLowerCase())) return;
       const ad = normStr(r[adIdx] || '');
       if (!ad) return;
       if (!result[ad]) result[ad] = { ventas: 0, cash: 0, fact: 0 };
@@ -550,6 +550,16 @@ async function fetchVentasByAdMeta() {
     });
     return result;
   } catch(e) { return {}; }
+}
+
+// Ventas por Ad filtrando solo fuente Meta (fb/ig/facebook/instagram)
+function fetchVentasByAdMeta() {
+  return _fetchVentasByAd(f => f.includes('fb') || f.includes('ig') || f.includes('facebook') || f.includes('instagram') || f.includes('meta'));
+}
+
+// Ventas por Ad filtrando solo fuente YouTube
+function fetchVentasByAdYt() {
+  return _fetchVentasByAd(f => f.includes('youtube') || f === 'yt');
 }
 
 // YouTube tiene cabeceras vacías — se parsea sin header y se mapea por índice
@@ -1255,7 +1265,7 @@ async function loadData() {
   document.getElementById('loadingOverlay').style.display = 'flex';
   document.getElementById('errorBanner').style.display = 'none';
   try {
-    [rawLeads, rawVentas, rawMeta, rawYoutube, rawVentAgg, rawVentFuente, rawPaisesSpend, rawVentPais, rawVentAdMeta] = await Promise.all([
+    [rawLeads, rawVentas, rawMeta, rawYoutube, rawVentAgg, rawVentFuente, rawPaisesSpend, rawVentPais, rawVentAdMeta, rawVentAdYt] = await Promise.all([
       fetchSheet('leads'),
       fetchSheet('ventas'),
       fetchSheet('meta'),
@@ -1265,8 +1275,8 @@ async function loadData() {
       fetchPaisesSpend(),
       fetchVentasByPais(),
       fetchVentasByAdMeta(),
+      fetchVentasByAdYt(),
     ]);
-    rawVentAdYt = rawVentAdMeta; // mismos datos, el filtro lo hace allKeys por spend de YouTube
 
     const sample = rawLeads[0] || {};
     leadsHasDate = !!(sample['Fecha'] || sample['fecha'] || sample['Timestamp'] || sample['Data de conversão']);
