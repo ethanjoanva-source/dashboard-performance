@@ -550,7 +550,6 @@ function buildVentAdYt() {
     result[ad].cash += parseNum(r['Cash Collected'] || 0);
     result[ad].fact += parseNum(r['Facturación']    || 0);
   });
-  console.log('[adYt] rawVentAdYt keys:', Object.keys(result).slice(0, 10));
   return result;
 }
 
@@ -759,9 +758,6 @@ function buildRows(dim, leads, ventas, meta, youtube) {
       const code = normAdCode(name);
       if (code && !adCodeToName[code]) adCodeToName[code] = name;
     });
-    console.log('[adYt] adCodeToName:', JSON.stringify(adCodeToName));
-    console.log('[adYt] youtube rows sample:', youtube.slice(0,2).map(r => r['Nombre del anuncio']));
-    console.log('[adYt] rawVentAdYt keys:', Object.keys(rawVentAdYt).slice(0,10));
   }
 
   // Leads
