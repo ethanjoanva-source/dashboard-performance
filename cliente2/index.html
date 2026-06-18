@@ -408,7 +408,9 @@ function getSourceGroup(src) {
 async function fetchSheet(name) {
   const res = await fetch(BASE_URL + encodeURIComponent(name) + '&tq=select%20*');
   if (!res.ok) throw new Error(`No se pudo cargar "${name}" (${res.status})`);
-  return Papa.parse(await res.text(), { header: true, skipEmptyLines: true }).data;
+  // Eliminar líneas en blanco que confunden a PapaParse al parsear el header
+  const text = (await res.text()).split('\n').filter(l => l.trim() !== '').join('\n');
+  return Papa.parse(text, { header: true, skipEmptyLines: true }).data;
 }
 
 async function fetchAggregate(sheetName, tq) {
@@ -1055,9 +1057,6 @@ async function loadData() {
     leadsHasDate = !!(sample['Fecha'] || sample['fecha'] || sample['Timestamp'] || sample['Data de conversão']);
     document.getElementById('notaLeads').style.display = leadsHasDate ? 'none' : 'block';
 
-    const _dbgRes = await fetch(BASE_URL + encodeURIComponent('ventas') + '&tq=select%20*');
-    const _dbgTxt = await _dbgRes.text();
-    console.log('[DEBUG] ventas raw CSV (first 600 chars):', _dbgTxt.substring(0, 600));
     populateSelects();
 
     const now = new Date();
