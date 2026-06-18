@@ -460,13 +460,9 @@ async function fetchVentasByFuente() {
 async function fetchPaisesSpend() {
   try {
     const res = await fetch(BASE_URL + encodeURIComponent('paises') + '&tq=select%20*');
-    console.log('[Paises] HTTP status:', res.status, res.ok);
-    if (!res.ok) { console.warn('[Paises] fetch falló'); return {}; }
-    const raw = await res.text();
-    console.log('[Paises] primeras 300 chars:', raw.slice(0, 300));
-    const text = raw.split('\n').filter(l => l.trim()).join('\n');
+    if (!res.ok) return {};
+    const text = (await res.text()).split('\n').filter(l => l.trim()).join('\n');
     const rows = Papa.parse(text, { header: false, skipEmptyLines: true }).data;
-    console.log('[Paises] total filas:', rows.length, '| fila0:', rows[0]);
     const result = {};
     rows.slice(1).forEach(row => {  // slice(1) omite fila de encabezado
       const metaPais = (row[0] || '').trim();
@@ -482,9 +478,8 @@ async function fetchPaisesSpend() {
         result[norm].ytSpend += parseNum(row[6] || 0);    // col6 = $ YouTube
       }
     });
-    console.log('[Paises] resultado final:', JSON.stringify(result));
     return result;
-  } catch(e) { console.error('[Paises] error:', e); return {}; }
+  } catch(e) { return {}; }
 }
 
 
@@ -497,7 +492,6 @@ async function fetchVentasByPais() {
     if (!res.ok) return {};
     const text = (await res.text()).split('\n').filter(l => l.trim()).join('\n');
     const rows = Papa.parse(text, { header: true, skipEmptyLines: true }).data;
-    console.log('[VentPais] filas:', rows.length, '| primera:', JSON.stringify(rows[0]));
     const result = {};
     rows.forEach(row => {
       const vals = Object.values(row);
@@ -511,9 +505,8 @@ async function fetchVentasByPais() {
       result[pais].cash  += cash;
       result[pais].fact  += fact;
     });
-    console.log('[VentPais] resultado:', JSON.stringify(result));
     return result;
-  } catch(e) { console.error('[VentPais] error:', e); return {}; }
+  } catch(e) { return {}; }
 }
 
 // YouTube tiene cabeceras vacías — se parsea sin header y se mapea por índice
@@ -641,6 +634,12 @@ const PAIS_NORM = {
   pa: 'Panamá',  panama: 'Panamá', 'panamá': 'Panamá',
   sv: 'El Salvador', 'el salvador': 'El Salvador',
   ve: 'Venezuela', venezuela: 'Venezuela',
+  py: 'Paraguay', paraguay: 'Paraguay',
+  gt: 'Guatemala', guatemala: 'Guatemala',
+  cr: 'Costa Rica', 'costa rica': 'Costa Rica',
+  hn: 'Honduras', honduras: 'Honduras',
+  br: 'Brasil',   brasil: 'Brasil', brazil: 'Brasil',
+  ni: 'Nicaragua', nicaragua: 'Nicaragua',
   otros: 'Otros',
 };
 
@@ -712,8 +711,6 @@ function buildRows(dim, leads, ventas, meta, youtube) {
         byVent[cat] = { ventas: data.ventas, cash: data.cash, fact: data.fact };
       });
     } else if (dim === 'pais') {
-      console.log('[buildRows pais] rawVentPais:', JSON.stringify(rawVentPais));
-      console.log('[buildRows pais] rawPaisesSpend:', JSON.stringify(rawPaisesSpend));
       // Usar datos pre-agregados por GViz agrupados por País
       Object.entries(rawVentPais).forEach(([pais, data]) => {
         byVent[pais] = { ventas: data.ventas, cash: data.cash, fact: data.fact };
