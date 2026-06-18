@@ -430,7 +430,7 @@ async function fetchYoutube() {
         'Campaña':            normStr(row[3] || ''),
         'Grupo de anuncios':  normStr(row[4] || ''),
         'Nombre del anuncio': normStr(row[5] || ''),
-        'Inversión':          row[6] || '0',
+        'Inversión':          row[7] || '0',
         'Pais':               normStr(row[20] || ''),
       }))
       .filter(r => r['Campaña'] && !isTemplate(r['Campaña']));
