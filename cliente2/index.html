@@ -283,11 +283,10 @@
 
 <div class="table-section">
   <div class="tab-bar">
-    <button class="btn-tab active" data-dim="campana">Campaña</button>
-    <button class="btn-tab" data-dim="adset">Adset</button>
-    <button class="btn-tab" data-dim="ad">Ad</button>
-    <button class="btn-tab" data-dim="fuente">Fuente</button>
-    <button class="btn-tab" data-dim="ubicacion">Ubicación</button>
+    <button class="btn-tab active" data-dim="fuente">Fuente</button>
+    <button class="btn-tab" data-dim="pais">País</button>
+    <button class="btn-tab" data-dim="adMeta">Ad Meta</button>
+    <button class="btn-tab" data-dim="adYt">Ad YouTube</button>
   </div>
   <div class="table-wrap">
     <table id="mainTable">
@@ -338,7 +337,7 @@ let activeRange = 'all', activeSource = 'all';
 let activeCampaign = 'all', activeAd = 'all';
 let dateFrom = null, dateTo = null;
 let leadsHasDate = false;
-let activeDim = 'campana';
+let activeDim = 'fuente';
 let sortCol = 'leads', sortDir = 'desc';
 
 // ── UTILS ──────────────────────────────────────────────────────────────
@@ -432,6 +431,7 @@ async function fetchYoutube() {
         'Grupo de anuncios':  normStr(row[4] || ''),
         'Nombre del anuncio': normStr(row[5] || ''),
         'Inversión':          row[6] || '0',
+        'Pais':               normStr(row[20] || ''),
       }))
       .filter(r => r['Campaña'] && !isTemplate(r['Campaña']));
   } catch(e) { return []; }
@@ -504,21 +504,45 @@ function filterYoutube() {
 }
 
 // ── DIM CONFIG ───────────────────────────────────────────────────────────────
+// skipMeta: no sumar gasto de meta | skipYt: no sumar gasto de youtube
 const DIM_CONFIG = {
-  campana:   { label: 'Campaña',   leadKey: 'utm_campaign', ventKey: 'Campaña',   metaKey: 'Nombre de la campaña',           ytKey: 'Campaña' },
-  adset:     { label: 'Adset',     leadKey: 'utm_content',  ventKey: 'Adset',     metaKey: 'Nombre del conjunto de anuncios', ytKey: 'Grupo de anuncios' },
-  ad:        { label: 'Ad',        leadKey: 'utm_term',     ventKey: 'Ad',        metaKey: 'Nombre del anuncio',              ytKey: 'Nombre del anuncio' },
-  fuente:    { label: 'Fuente',    leadKey: 'utm_source',   ventKey: 'Fuente',    metaKey: 'Plataforma',                      ytKey: null },
-  ubicacion: { label: 'Ubicación', leadKey: 'utm_medium',   ventKey: 'Ubicación', metaKey: 'Ubicación',                       ytKey: null },
+  fuente: { label: 'Fuente',     leadKey: 'utm_source', ventKey: 'Fuente',    metaKey: 'Plataforma',         ytKey: null,                   skipMeta: false, skipYt: false },
+  pais:   { label: 'País',       leadKey: 'Pais',       ventKey: 'País',      metaKey: null,                 ytKey: 'Pais',                 skipMeta: true,  skipYt: false },
+  adMeta: { label: 'Ad Meta',    leadKey: 'utm_term',   ventKey: 'Ad',        metaKey: 'Nombre del anuncio', ytKey: null,                   skipMeta: false, skipYt: true  },
+  adYt:   { label: 'Ad YouTube', leadKey: 'utm_term',   ventKey: 'Ad',        metaKey: null,                 ytKey: 'Nombre del anuncio',   skipMeta: true,  skipYt: false },
 };
 
 const FUENTE_NORM = {
   fb: 'Facebook', facebook: 'Facebook', meta: 'Facebook',
   ig: 'Instagram', instagram: 'Instagram',
-  youtube: 'YouTube', yt: 'YouTube',
+  youtube: 'YouTube', yt: 'YouTube', pagoyoutube: 'YouTube',
   setting: 'Setting', ig_bio: 'Setting', linktree: 'Setting',
   referidos: 'Referidos', referral: 'Referidos', ref: 'Referidos',
   direct: 'Direct', organico: 'Orgánico', organic: 'Orgánico',
+  afiliado: 'Afiliado',
+  // Valores de ventas.Fuente que contienen placement info
+  facebook_mobile_reels: 'Facebook', facebook_mobile_feed: 'Facebook',
+  facebook_desktop_feed: 'Facebook', facebook_profile_feed: 'Facebook',
+  instagram_reels: 'Instagram', instagram_feed: 'Instagram',
+  instagram_stories: 'Instagram',
+};
+
+const PAIS_NORM = {
+  pe: 'Perú',    peru: 'Perú',    'perú': 'Perú',
+  co: 'Colombia', colombia: 'Colombia',
+  cl: 'Chile',   chile: 'Chile',
+  ar: 'Argentina', argentina: 'Argentina',
+  mx: 'México',  mexico: 'México', 'méxico': 'México',
+  ec: 'Ecuador', ecuador: 'Ecuador',
+  es: 'España',  spain: 'España',  'españa': 'España',
+  us: 'EEUU',    usa: 'EEUU',      'united states': 'EEUU',
+  bo: 'Bolivia', bolivia: 'Bolivia',
+  uy: 'Uruguay', uruguay: 'Uruguay',
+  do: 'Rep. Dominicana', 'dominican republic': 'Rep. Dominicana',
+  pa: 'Panamá',  panama: 'Panamá', 'panamá': 'Panamá',
+  sv: 'El Salvador', 'el salvador': 'El Salvador',
+  ve: 'Venezuela', venezuela: 'Venezuela',
+  otros: 'Otros',
 };
 
 const UBICACION_NORM = {
@@ -555,8 +579,15 @@ const GENERIC_INVALID = new Set(['#n/a', '#n/d', '#error!', 'utm_source', 'utm_m
 function normKey(dim, raw) {
   const s = (raw || '').trim();
   if (!s || GENERIC_INVALID.has(s.toLowerCase())) return 'Sin atribuir';
-  if (dim === 'fuente')    return FUENTE_NORM[s.toLowerCase()] || s;
-  if (dim === 'ubicacion') return UBICACION_NORM[s.toLowerCase()] || s;
+  if (dim === 'fuente') return FUENTE_NORM[s.toLowerCase()] || s;
+  if (dim === 'pais')   return PAIS_NORM[s.toLowerCase()]   || s;
+  // Decodifica nombres de ads con + (URL encoding)
+  if (dim === 'adMeta' || dim === 'adYt') {
+    const decoded = s.replace(/\+/g, ' ');
+    // Descarta IDs puramente numéricos
+    if (/^[\d.,\s]+$/.test(decoded)) return 'Sin atribuir';
+    return decoded;
+  }
   return s;
 }
 
@@ -566,58 +597,54 @@ function buildRows(dim, leads, ventas, meta, youtube) {
 
   const byLeads = {}, byVent = {}, bySpend = {};
 
-  leads.forEach(r => {
-    const k = normKey(dim, normStr(r[cfg.leadKey])) || 'Sin atribuir';
-    byLeads[k] = (byLeads[k] || 0) + 1;
-  });
+  // Leads
+  if (cfg.leadKey) {
+    leads.forEach(r => {
+      const k = normKey(dim, normStr(r[cfg.leadKey])) || 'Sin atribuir';
+      byLeads[k] = (byLeads[k] || 0) + 1;
+    });
+  }
 
-  ventas.forEach(r => {
-    const k = normKey(dim, normStr(r[cfg.ventKey])) || 'Sin atribuir';
-    if (!byVent[k]) byVent[k] = { ventas: 0, cash: 0, fact: 0 };
-    byVent[k].ventas++;
-    byVent[k].cash += parseNum(r['Cash Collected'] || 0);
-    byVent[k].fact += parseNum(r['Facturación'] || 0);
-  });
+  // Ventas
+  if (cfg.ventKey) {
+    ventas.forEach(r => {
+      const k = normKey(dim, normStr(r[cfg.ventKey])) || 'Sin atribuir';
+      if (!byVent[k]) byVent[k] = { ventas: 0, cash: 0, fact: 0 };
+      byVent[k].ventas++;
+      byVent[k].cash += parseNum(r['Cash Collected'] || 0);
+      byVent[k].fact += parseNum(r['Facturación'] || 0);
+    });
+  }
 
-  // Meta spend
-  meta.forEach(r => {
-    let k;
-    if (dim === 'ubicacion') {
-      const ubic = normStr(r[cfg.metaKey] || '');
-      if (ubic.toLowerCase() === 'feed') {
-        const plat = normStr(r['Plataforma'] || '').toLowerCase();
-        k = plat === 'instagram' ? 'Instagram Feed' : 'Facebook Feed';
+  // Meta spend (si no está bloqueado y tiene metaKey)
+  if (!cfg.skipMeta && cfg.metaKey) {
+    meta.forEach(r => {
+      const k = normKey(dim, normStr(r[cfg.metaKey])) || 'Sin atribuir';
+      bySpend[k] = (bySpend[k] || 0) + metaSpend(r);
+    });
+  }
+
+  // YouTube spend (si no está bloqueado)
+  if (!cfg.skipYt) {
+    youtube.forEach(r => {
+      let k;
+      if (dim === 'fuente') {
+        k = 'YouTube';
+      } else if (cfg.ytKey) {
+        k = normKey(dim, normStr(r[cfg.ytKey]));
       } else {
-        k = normKey(dim, ubic);
+        k = 'Sin atribuir';
       }
-    } else {
-      k = normKey(dim, normStr(r[cfg.metaKey]));
-    }
-    k = k || 'Sin atribuir';
-    bySpend[k] = (bySpend[k] || 0) + metaSpend(r);
-  });
-
-  // YouTube spend
-  youtube.forEach(r => {
-    let k;
-    if (dim === 'fuente') {
-      k = 'YouTube';
-    } else if (dim === 'ubicacion') {
-      k = 'YouTube';
-    } else if (cfg.ytKey) {
-      k = normKey(dim, normStr(r[cfg.ytKey]));
-    } else {
-      k = 'Sin atribuir';
-    }
-    k = k || 'Sin atribuir';
-    bySpend[k] = (bySpend[k] || 0) + parseNum(r['Inversión'] || 0);
-  });
+      k = k || 'Sin atribuir';
+      bySpend[k] = (bySpend[k] || 0) + parseNum(r['Inversión'] || 0);
+    });
+  }
 
   const allKeys = [...new Set([
     ...Object.keys(byLeads),
     ...Object.keys(byVent),
     ...Object.keys(bySpend),
-  ])].filter(k => !isTemplate(k));
+  ])].filter(k => k && !isTemplate(k) && k !== 'Sin atribuir' || (byLeads[k] || byVent[k] || bySpend[k]));
 
   return allKeys.map(key => {
     const l   = byLeads[key] || 0;
