@@ -769,7 +769,12 @@ function buildRows(dim, leads, ventas, meta, youtube) {
     ...Object.keys(byLeads),
     ...Object.keys(byVent),
     ...Object.keys(bySpend),
-  ])].filter(k => k && !isTemplate(k) && k !== 'Sin atribuir' || (byLeads[k] || byVent[k] || bySpend[k]));
+  ])].filter(k => {
+    if (!k || isTemplate(k) || k === 'Sin atribuir') return false;
+    // Para Ad Meta: solo mostrar ads que existen en la hoja meta (tienen gasto registrado)
+    if (dim === 'adMeta') return !!bySpend[k];
+    return true;
+  });
 
   return allKeys.map(key => {
     const l   = byLeads[key] || 0;
