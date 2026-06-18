@@ -609,18 +609,21 @@ function buildRows(dim, leads, ventas, meta, youtube) {
 
   // Ventas
   if (cfg.ventKey) {
-    if (dim === 'fuente') console.log('[DEBUG] ventas fuente sample:', ventas.slice(0,3).map(r => ({fuente: r['Fuente'], camp: r['Campaña']})));
     ventas.forEach(r => {
       let k;
       if (dim === 'fuente') {
-        const fuente = normStr(r['Fuente'] || '');
-        if (fuente) {
-          k = normKey(dim, fuente);
-        } else {
-          // Fuente vacía: si la Campaña es solo números es una venta de YouTube
+        const f = (r['Fuente'] || '').trim().toLowerCase();
+        if (f === 'fb' || f.startsWith('facebook'))        k = 'Facebook';
+        else if (f === 'ig' || f.startsWith('instagram'))  k = 'Instagram';
+        else if (f === 'pagoyoutube' || f === 'youtube' || f === 'yt') k = 'YouTube';
+        else if (f === 'organico' || f === 'orgánico' || f === 'organic') k = 'Orgánico';
+        else if (f === 'afiliado')                         k = 'Afiliado';
+        else if (!f) {
+          // Fuente vacía: detectar YouTube por campaña numérica
           const camp = normStr(r['Campaña'] || '');
           k = /^[\d.,\s]+$/.test(camp) ? 'YouTube' : 'Desconocido';
         }
+        else k = 'Desconocido';
       } else {
         k = normKey(dim, normStr(r[cfg.ventKey])) || 'Sin atribuir';
       }
@@ -629,7 +632,6 @@ function buildRows(dim, leads, ventas, meta, youtube) {
       byVent[k].cash += parseNum(r['Cash Collected'] || 0);
       byVent[k].fact += parseNum(r['Facturación'] || 0);
     });
-    if (dim === 'fuente') console.log('[DEBUG] byVent fuente:', JSON.stringify(Object.fromEntries(Object.entries(byVent).map(([k,v])=>[k,v.ventas]))));
   }
 
   // Meta spend (si no está bloqueado y tiene metaKey)
