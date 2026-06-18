@@ -512,19 +512,20 @@ const DIM_CONFIG = {
   adYt:   { label: 'Ad YouTube', leadKey: 'utm_term',   ventKey: 'Ad',        metaKey: null,                 ytKey: 'Nombre del anuncio',   skipMeta: true,  skipYt: false },
 };
 
+// Solo 5 categorías en Fuente: Meta | Orgánico | YouTube | Afiliado | Desconocido
 const FUENTE_NORM = {
-  fb: 'Facebook', facebook: 'Facebook', meta: 'Facebook',
-  ig: 'Instagram', instagram: 'Instagram',
+  // Meta (Facebook + Instagram ads)
+  fb: 'Meta', facebook: 'Meta', meta: 'Meta',
+  ig: 'Meta', instagram: 'Meta',
+  facebook_mobile_reels: 'Meta', facebook_mobile_feed: 'Meta',
+  facebook_desktop_feed: 'Meta', facebook_profile_feed: 'Meta',
+  instagram_reels: 'Meta', instagram_feed: 'Meta', instagram_stories: 'Meta',
+  // YouTube
   youtube: 'YouTube', yt: 'YouTube', pagoyoutube: 'YouTube',
-  setting: 'Setting', ig_bio: 'Setting', linktree: 'Setting',
-  referidos: 'Referidos', referral: 'Referidos', ref: 'Referidos',
-  direct: 'Direct', organico: 'Orgánico', organic: 'Orgánico',
+  // Orgánico
+  organico: 'Orgánico', organic: 'Orgánico', 'orgánico': 'Orgánico',
+  // Afiliado
   afiliado: 'Afiliado',
-  // Valores de ventas.Fuente que contienen placement info
-  facebook_mobile_reels: 'Facebook', facebook_mobile_feed: 'Facebook',
-  facebook_desktop_feed: 'Facebook', facebook_profile_feed: 'Facebook',
-  instagram_reels: 'Instagram', instagram_feed: 'Instagram',
-  instagram_stories: 'Instagram',
 };
 
 const PAIS_NORM = {
@@ -579,7 +580,7 @@ const GENERIC_INVALID = new Set(['#n/a', '#n/d', '#error!', 'utm_source', 'utm_m
 function normKey(dim, raw) {
   const s = (raw || '').trim();
   if (!s || GENERIC_INVALID.has(s.toLowerCase())) return 'Sin atribuir';
-  if (dim === 'fuente') return FUENTE_NORM[s.toLowerCase()] || s;
+  if (dim === 'fuente') return FUENTE_NORM[s.toLowerCase()] || 'Desconocido';
   if (dim === 'pais')   return PAIS_NORM[s.toLowerCase()]   || s;
   // Decodifica nombres de ads con + (URL encoding)
   if (dim === 'adMeta' || dim === 'adYt') {
