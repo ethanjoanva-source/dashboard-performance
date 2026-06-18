@@ -987,6 +987,12 @@ function renderTable(rows, tL, tV, tInv, tCash, tFact) {
     tbody.appendChild(tr);
   });
 
+  // Totales calculados desde las filas visibles de la tabla
+  const tL    = rows.reduce((s, r) => s + r.leads,    0);
+  const tV    = rows.reduce((s, r) => s + r.ventas,   0);
+  const tInv  = rows.reduce((s, r) => s + r.inversion,0);
+  const tCash = rows.reduce((s, r) => s + r.cash,     0);
+  const tFact = rows.reduce((s, r) => s + r.fact,     0);
   const tBcash = tCash - tInv, tBrev = tFact - tInv;
   const tRoasCash = tInv > 0 ? tCash / tInv : null;
   const tRoasRev  = tInv > 0 ? tFact / tInv : null;
