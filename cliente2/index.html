@@ -526,6 +526,7 @@ async function fetchVentasByPais() {
 // Ventas agrupadas por Ad — usa rawVentas (ya cargado), sin fetch extra
 function buildVentAdMeta() {
   const result = {};
+  if (rawVentas && rawVentas[0]) console.log('[debug] cols ventas:', Object.keys(rawVentas[0]));
   (rawVentas || []).forEach(r => {
     const ad = normStr(r['Ad'] || '');
     if (!ad) return;
