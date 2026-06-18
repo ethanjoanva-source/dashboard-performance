@@ -239,19 +239,27 @@
     @media (max-width: 1100px) { .charts-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 700px)  { .charts-grid { grid-template-columns: 1fr; } }
     .chart-card {
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 18px 16px 14px;
-      transition: border-color .2s, box-shadow .2s;
+      background: linear-gradient(145deg, rgba(20,16,50,0.95), rgba(10,8,30,0.98));
+      border: 1px solid rgba(180,77,255,0.15);
+      border-radius: 18px;
+      padding: 20px 18px 14px;
+      transition: border-color .25s, box-shadow .25s, transform .2s;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
     }
     .chart-card:hover {
-      border-color: rgba(139,92,246,0.35);
-      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+      border-color: rgba(180,77,255,0.45);
+      box-shadow: 0 0 28px rgba(180,77,255,0.15), 0 4px 32px rgba(0,0,0,0.5);
+      transform: translateY(-1px);
     }
     .chart-card-title {
-      font-size: 10px; font-weight: 800; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px;
+      font-size: 10px; font-weight: 800; color: #7b8cc8;
+      text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 14px;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .chart-card-title::before {
+      content: ''; width: 4px; height: 4px; border-radius: 50%;
+      background: var(--accent-purple);
+      box-shadow: 0 0 6px var(--accent-purple);
     }
     .chart-canvas-wrap { position: relative; }
     .chart-card-wide { grid-column: span 2; }
@@ -807,59 +815,62 @@ function renderCharts(rows) {
   const labels = sorted.map(r => truncLabel(r.camp));
   const n = sorted.length;
 
-  // Color palette for doughnut segments — new purple/cyan theme
+  // Neon cyberpunk palette
   const PALETTE = [
-    '#8b5cf6','#22d3ee','#ec4899','#60a5fa','#34d399',
-    '#fbbf24','#f97316','#a78bfa','#06b6d4','#f472b6',
+    '#b44dff','#00f0ff','#ff2d78','#4facff','#00ffb3',
+    '#ffe259','#ff6b35','#c77dff','#0affef','#ff4da6',
   ];
   const segColors = PALETTE.slice(0, n);
+  const benColors = sorted.map(r => r.bcash >= 0 ? '#00ffb3' : '#ff4d6d');
 
-  // Beneficio: green for positive, red for negative
-  const benColors = sorted.map(r => r.bcash >= 0 ? '#34d399' : '#f87171');
-
-  const C = {
-    orange: 'rgba(249,115,22,0.85)',
-    yellow: 'rgba(251,191,36,0.88)',
-    purple: 'rgba(139,92,246,0.85)',
-    cyan:   'rgba(34,211,238,0.85)',
-  };
+  // Gradient factory for bar charts
+  function grad(canvasId, c1, c2) {
+    return (ctx) => {
+      const chart = ctx.chart;
+      const { ctx: c, chartArea } = chart;
+      if (!chartArea) return c1;
+      const g = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+      g.addColorStop(0, c1); g.addColorStop(1, c2);
+      return g;
+    };
+  }
 
   const shortLabels = sorted.map(r => truncLabel(r.camp, 14));
 
   const DEFS = [
-    // ── Fila 1: Volumen + Eficiencia ──
-    { title: 'Leads',              kind: 'donut', data: sorted.map(r => r.leads),           colors: segColors,  fmt: v => fmtN(v) },
-    { title: 'Ventas',             kind: 'donut', data: sorted.map(r => r.ventas),          colors: segColors,  fmt: v => fmtN(v) },
-    { title: 'ROAS Cash',          kind: 'vbar',  data: sorted.map(r => r.roasCash || 0),   color: C.yellow,    fmt: v => fmtN(v,2) + 'x' },
-    // ── Fila 2: Inversión y Costo ──
-    { title: 'Inversión + CPL',    kind: 'combo',
-      invData: sorted.map(r => r.inversion),
-      cplData: sorted.map(r => r.cpl || 0) },
-    { title: 'CAC',                kind: 'vbar',  data: sorted.map(r => r.cac   || 0),      color: C.purple,    fmt: v => '$' + fmtN(v) },
-    // ── Fila 3: Revenue ──
-    { title: 'Cash',               kind: 'donut', data: sorted.map(r => r.cash),            colors: segColors,  fmt: v => '$' + fmtN(v) },
-    { title: 'Facturación',        kind: 'donut', data: sorted.map(r => r.fact),            colors: segColors,  fmt: v => '$' + fmtN(v) },
-    { title: 'Beneficio Cash',     kind: 'donut', data: sorted.map(r => Math.abs(r.bcash)), colors: benColors,  fmt: (v, i) => '$' + fmtN(sorted[i]?.bcash ?? v), realData: sorted.map(r => r.bcash) },
+    { title: 'Leads',          kind: 'donut', data: sorted.map(r => r.leads),           colors: segColors, fmt: v => fmtN(v) },
+    { title: 'Ventas',         kind: 'donut', data: sorted.map(r => r.ventas),          colors: segColors, fmt: v => fmtN(v) },
+    { title: 'ROAS Cash',      kind: 'vbar',  data: sorted.map(r => r.roasCash || 0),
+      gradTop: 'rgba(255,226,89,0.95)', gradBot: 'rgba(255,119,53,0.3)', fmt: v => fmtN(v,2)+'x' },
+    { title: 'Inversión + CPL', kind: 'combo',
+      invData: sorted.map(r => r.inversion), cplData: sorted.map(r => r.cpl || 0) },
+    { title: 'CAC',            kind: 'vbar',  data: sorted.map(r => r.cac || 0),
+      gradTop: 'rgba(180,77,255,0.95)', gradBot: 'rgba(79,172,255,0.2)', fmt: v => '$'+fmtN(v) },
+    { title: 'Cash',           kind: 'donut', data: sorted.map(r => r.cash),            colors: segColors, fmt: v => '$'+fmtN(v) },
+    { title: 'Facturación',    kind: 'donut', data: sorted.map(r => r.fact),            colors: segColors, fmt: v => '$'+fmtN(v) },
+    { title: 'Beneficio Cash', kind: 'donut', data: sorted.map(r => Math.abs(r.bcash)), colors: benColors,
+      fmt: (v, i) => '$'+fmtN(sorted[i]?.bcash ?? v) },
   ];
 
-  const barH   = Math.max(180, n * 34 + 48) + 'px';
   const donutH = '300px';
-  const comboH = '280px';
+  const comboH = '290px';
 
   const tooltipBase = {
-    backgroundColor: '#13112e', borderColor: 'rgba(139,92,246,0.4)', borderWidth: 1,
-    titleColor: '#a8b2d8', bodyColor: '#e2e8f0', padding: 12,
-    cornerRadius: 8,
+    backgroundColor: 'rgba(10,8,30,0.95)', borderColor: 'rgba(180,77,255,0.5)',
+    borderWidth: 1, titleColor: '#c4b5fd', bodyColor: '#e2e8f0',
+    padding: 12, cornerRadius: 10,
   };
 
   const yTickFmt = v => {
     const abs = Math.abs(v);
-    if (abs >= 1e6) return (v / 1e6).toFixed(1) + 'M';
-    if (abs >= 1e3) return (v / 1e3).toFixed(0) + 'K';
+    if (abs >= 1e6) return (v/1e6).toFixed(1)+'M';
+    if (abs >= 1e3) return (v/1e3).toFixed(0)+'K';
     return fmtN(v, 0);
   };
 
-  const heightOf = d => d.kind === 'donut' ? donutH : (d.kind === 'combo' || d.kind === 'vbar') ? comboH : barH;
+  const gridColor  = 'rgba(180,77,255,0.07)';
+  const tickColor  = '#6b7ab0';
+  const heightOf = d => d.kind === 'donut' ? donutH : comboH;
 
   grid.innerHTML = DEFS.map((d, i) => `
     <div class="chart-card${d.kind === 'combo' ? ' chart-card-wide' : ''}">
@@ -870,6 +881,7 @@ function renderCharts(rows) {
     </div>`).join('');
 
   DEFS.forEach((d, i) => {
+    const canvasId = 'ch' + i;
     let cfg;
 
     if (d.kind === 'combo') {
@@ -879,166 +891,97 @@ function renderCharts(rows) {
           labels: shortLabels,
           datasets: [
             {
-              type: 'bar',
-              label: 'Inversión',
-              data: d.invData,
-              backgroundColor: 'rgba(249,115,22,0.75)',
-              borderRadius: 6,
-              borderSkipped: false,
-              yAxisID: 'yInv',
-              order: 2,
+              type: 'bar', label: 'Inversión', data: d.invData,
+              backgroundColor: grad(canvasId, 'rgba(255,107,53,0.9)', 'rgba(255,107,53,0.15)'),
+              borderRadius: 7, borderSkipped: false, yAxisID: 'yInv', order: 2,
             },
             {
-              type: 'line',
-              label: 'CPL',
-              data: d.cplData,
-              borderColor: '#22d3ee',
-              backgroundColor: 'rgba(34,211,238,0.1)',
+              type: 'line', label: 'CPL', data: d.cplData,
+              borderColor: '#00f0ff',
+              backgroundColor: 'rgba(0,240,255,0.08)',
               borderWidth: 2.5,
-              pointBackgroundColor: '#22d3ee',
-              pointBorderColor: '#07071a',
-              pointBorderWidth: 2,
-              pointRadius: 5,
-              pointHoverRadius: 7,
-              fill: false,
-              tension: 0.4,
-              yAxisID: 'yCpl',
-              order: 1,
+              pointBackgroundColor: '#00f0ff',
+              pointBorderColor: '#07071a', pointBorderWidth: 2,
+              pointRadius: 5, pointHoverRadius: 8,
+              fill: true, tension: 0.45, yAxisID: 'yCpl', order: 1,
             }
           ]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
+          responsive: true, maintainAspectRatio: false,
           interaction: { mode: 'index', intersect: false },
           plugins: {
-            legend: {
-              display: true,
-              labels: { color: '#a8b2d8', font: { size: 11 }, boxWidth: 10, usePointStyle: true, pointStyleWidth: 10 }
-            },
-            tooltip: {
-              ...tooltipBase,
-              callbacks: {
-                label: ctx => ctx.dataset.label === 'Inversión'
-                  ? '  Inversión: $' + fmtN(ctx.raw)
-                  : '  CPL: $' + fmtN(ctx.raw)
-              }
-            }
+            legend: { display: true, labels: { color: '#a8b2d8', font: { size: 11 }, boxWidth: 10, usePointStyle: true } },
+            tooltip: { ...tooltipBase, callbacks: {
+              label: ctx => ctx.dataset.label === 'Inversión'
+                ? '  Inversión: $'+fmtN(ctx.raw)
+                : '  CPL: $'+fmtN(ctx.raw)
+            }}
           },
           scales: {
-            x: {
-              grid: { color: 'rgba(139,92,246,0.08)' },
-              ticks: { color: '#8892b0', font: { size: 10 }, maxRotation: 30, minRotation: 0 }
-            },
-            yInv: {
-              type: 'linear', position: 'left',
-              grid: { color: 'rgba(139,92,246,0.08)' },
-              ticks: { color: '#f97316', font: { size: 10 }, callback: yTickFmt }
-            },
-            yCpl: {
-              type: 'linear', position: 'right',
-              grid: { drawOnChartArea: false },
-              ticks: { color: '#22d3ee', font: { size: 10 }, callback: v => '$' + fmtN(v) }
-            }
+            x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 }, maxRotation: 30 } },
+            yInv: { type:'linear', position:'left',  grid: { color: gridColor }, ticks: { color:'#ff8c42', font:{size:10}, callback: yTickFmt } },
+            yCpl: { type:'linear', position:'right', grid: { drawOnChartArea:false }, ticks: { color:'#00f0ff', font:{size:10}, callback: v=>'$'+fmtN(v) } }
           }
         }
       };
 
     } else if (d.kind === 'donut') {
+      // Glowing border on hover via hoverBorderColor
+      const hoverColors = d.colors.map(c => '#ffffff');
       cfg = {
-          type: 'doughnut',
-          data: {
-            labels,
-            datasets: [{
-              data: d.data,
-              backgroundColor: d.colors,
-              borderColor: '#07071a',
-              borderWidth: 3,
-              hoverOffset: 8,
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '62%',
-            plugins: {
-              legend: {
-                display: true,
-                position: 'bottom',
-                labels: {
-                  color: '#8892b0', font: { size: 10 },
-                  padding: 10, boxWidth: 8, boxHeight: 8, usePointStyle: true,
-                }
-              },
-              tooltip: {
-                ...tooltipBase,
-                callbacks: { label: ctx => '  ' + d.fmt(ctx.raw, ctx.dataIndex) }
-              }
-            }
+        type: 'doughnut',
+        data: {
+          labels,
+          datasets: [{
+            data: d.data,
+            backgroundColor: d.colors,
+            borderColor: '#07071a',
+            hoverBorderColor: d.colors,
+            borderWidth: 2,
+            hoverOffset: 12,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          cutout: '68%',
+          plugins: {
+            legend: {
+              display: true, position: 'bottom',
+              labels: { color: '#8892b0', font:{size:10}, padding:10, boxWidth:8, boxHeight:8, usePointStyle:true }
+            },
+            tooltip: { ...tooltipBase, callbacks: { label: ctx => '  '+d.fmt(ctx.raw, ctx.dataIndex) } }
           }
-        };
+        }
+      };
 
     } else if (d.kind === 'vbar') {
       cfg = {
-          type: 'bar',
-          data: {
-            labels: shortLabels,
-            datasets: [{
-              data: d.data,
-              backgroundColor: Array(n).fill(d.color),
-              borderRadius: 5,
-              borderSkipped: false,
-            }]
+        type: 'bar',
+        data: {
+          labels: shortLabels,
+          datasets: [{
+            data: d.data,
+            backgroundColor: grad(canvasId, d.gradTop, d.gradBot),
+            borderRadius: 8, borderSkipped: false,
+            borderColor: d.gradTop, borderWidth: 0,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { ...tooltipBase, callbacks: { label: ctx => '  '+d.fmt(ctx.raw) } }
           },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                ...tooltipBase,
-                callbacks: { label: ctx => '  ' + d.fmt(ctx.raw) }
-              }
-            },
-            scales: {
-              x: { grid: { display: false }, ticks: { color: '#8892b0', font: { size: 10 }, maxRotation: 30 } },
-              y: { grid: { color: 'rgba(139,92,246,0.08)' }, ticks: { color: '#8892b0', font: { size: 10 }, callback: yTickFmt } }
-            }
+          scales: {
+            x: { grid: { display: false }, ticks: { color: tickColor, font:{size:10}, maxRotation:30 } },
+            y: { grid: { color: gridColor }, ticks: { color: tickColor, font:{size:10}, callback: yTickFmt } }
           }
-        };
-
-    } else {
-      cfg = {
-          type: 'bar',
-          data: {
-            labels,
-            datasets: [{
-              data: d.data,
-              backgroundColor: Array(n).fill(d.color),
-              borderRadius: 5,
-              borderSkipped: false,
-            }]
-          },
-          options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                ...tooltipBase,
-                callbacks: { label: ctx => '  ' + d.fmt(ctx.raw) }
-              }
-            },
-            scales: {
-              x: { grid: { color: 'rgba(139,92,246,0.08)' }, ticks: { color: '#8892b0', font: { size: 10 }, callback: yTickFmt } },
-              y: { grid: { display: false }, ticks: { color: '#a8b2d8', font: { size: 11 } } }
-            }
-          }
-        };
+        }
+      };
     }
 
-    const chart = new Chart(document.getElementById('ch' + i), cfg);
+    const chart = new Chart(document.getElementById(canvasId), cfg);
     chartInstances.push(chart);
   });
 }
