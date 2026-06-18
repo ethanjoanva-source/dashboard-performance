@@ -334,6 +334,8 @@ const SOURCE_MAP = {
 let rawLeads = [], rawVentas = [], rawMeta = [], rawYoutube = [];
 let rawVentAgg = null;
 let rawVentFuente = {}; // ventas pre-agregadas por Fuente desde GViz
+let rawPaisesSpend = {}; // gasto Meta+YouTube por País desde hoja "paises"
+let rawVentPais = {};    // ventas pre-agregadas por País desde GViz
 let activeRange = 'all', activeSource = 'all';
 let activeCampaign = 'all', activeAd = 'all';
 let dateFrom = null, dateTo = null;
@@ -449,6 +451,58 @@ async function fetchVentasByFuente() {
       result[cat].ventas += count;
       result[cat].cash  += cash;
       result[cat].fact  += fact;
+    });
+    return result;
+  } catch(e) { return {}; }
+}
+
+// Gasto por País desde la hoja "paises" (Meta col0+col3, YouTube col5+col6)
+async function fetchPaisesSpend() {
+  try {
+    const res = await fetch(BASE_URL + encodeURIComponent('paises') + '&tq=select%20*');
+    if (!res.ok) return {};
+    const text = (await res.text()).split('\n').filter(l => l.trim()).join('\n');
+    const rows = Papa.parse(text, { header: false, skipEmptyLines: true }).data;
+    const result = {};
+    rows.slice(1).forEach(row => {  // slice(1) omite fila de encabezado
+      const metaPais = (row[0] || '').trim();
+      const ytPais   = (row[5] || '').trim();
+      if (metaPais && metaPais.toUpperCase() !== 'TOTAL') {
+        const norm = normKey('pais', metaPais);
+        if (!result[norm]) result[norm] = { metaSpend: 0, ytSpend: 0 };
+        result[norm].metaSpend += parseNum(row[3] || 0);  // col3 = $ total Meta
+      }
+      if (ytPais && ytPais.toUpperCase() !== 'TOTAL' && ytPais.toLowerCase() !== 'otros') {
+        const norm = normKey('pais', ytPais);
+        if (!result[norm]) result[norm] = { metaSpend: 0, ytSpend: 0 };
+        result[norm].ytSpend += parseNum(row[6] || 0);    // col6 = $ YouTube
+      }
+    });
+    return result;
+  } catch(e) { return {}; }
+}
+
+// Ventas agrupadas por País usando GViz query (columna E en hoja ventas)
+async function fetchVentasByPais() {
+  const tq = 'select E, count(A), sum(F), sum(O) group by E';
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=ventas&tq=${encodeURIComponent(tq)}`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return {};
+    const text = (await res.text()).split('\n').filter(l => l.trim()).join('\n');
+    const rows = Papa.parse(text, { header: true, skipEmptyLines: true }).data;
+    const result = {};
+    rows.forEach(row => {
+      const vals = Object.values(row);
+      const pais = normKey('pais', (vals[0] || '').trim());
+      if (!pais || pais === 'Sin atribuir') return;
+      const count = parseInt(vals[1] || 0) || 0;
+      const cash  = parseFloat(vals[2] || 0) || 0;  // GViz devuelve punto decimal inglés
+      const fact  = parseFloat(vals[3] || 0) || 0;
+      if (!result[pais]) result[pais] = { ventas: 0, cash: 0, fact: 0 };
+      result[pais].ventas += count;
+      result[pais].cash  += cash;
+      result[pais].fact  += fact;
     });
     return result;
   } catch(e) { return {}; }
@@ -572,10 +626,10 @@ const PAIS_NORM = {
   mx: 'México',  mexico: 'México', 'méxico': 'México',
   ec: 'Ecuador', ecuador: 'Ecuador',
   es: 'España',  spain: 'España',  'españa': 'España',
-  us: 'EEUU',    usa: 'EEUU',      'united states': 'EEUU',
+  us: 'EEUU',    usa: 'EEUU',      'united states': 'EEUU',  eeuu: 'EEUU', 'estados unidos': 'EEUU',
   bo: 'Bolivia', bolivia: 'Bolivia',
   uy: 'Uruguay', uruguay: 'Uruguay',
-  do: 'Rep. Dominicana', 'dominican republic': 'Rep. Dominicana',
+  do: 'Rep. Dominicana', 'dominican republic': 'Rep. Dominicana', 'republica dominicana': 'Rep. Dominicana', 'república dominicana': 'Rep. Dominicana',
   pa: 'Panamá',  panama: 'Panamá', 'panamá': 'Panamá',
   sv: 'El Salvador', 'el salvador': 'El Salvador',
   ve: 'Venezuela', venezuela: 'Venezuela',
@@ -649,6 +703,11 @@ function buildRows(dim, leads, ventas, meta, youtube) {
       Object.entries(rawVentFuente).forEach(([cat, data]) => {
         byVent[cat] = { ventas: data.ventas, cash: data.cash, fact: data.fact };
       });
+    } else if (dim === 'pais') {
+      // Usar datos pre-agregados por GViz agrupados por País
+      Object.entries(rawVentPais).forEach(([pais, data]) => {
+        byVent[pais] = { ventas: data.ventas, cash: data.cash, fact: data.fact };
+      });
     } else {
       ventas.forEach(r => {
         const k = normKey(dim, normStr(r[cfg.ventKey])) || 'Sin atribuir';
@@ -660,16 +719,23 @@ function buildRows(dim, leads, ventas, meta, youtube) {
     }
   }
 
-  // Meta spend (si no está bloqueado y tiene metaKey)
-  if (!cfg.skipMeta && cfg.metaKey) {
+  // Inversión por País desde hoja "paises" (Meta + YouTube combinados)
+  if (dim === 'pais') {
+    Object.entries(rawPaisesSpend).forEach(([pais, data]) => {
+      bySpend[pais] = (bySpend[pais] || 0) + data.metaSpend + data.ytSpend;
+    });
+  }
+
+  // Meta spend (si no está bloqueado y tiene metaKey) — no aplica a pais
+  if (dim !== 'pais' && !cfg.skipMeta && cfg.metaKey) {
     meta.forEach(r => {
       const k = normKey(dim, normStr(r[cfg.metaKey])) || 'Sin atribuir';
       bySpend[k] = (bySpend[k] || 0) + metaSpend(r);
     });
   }
 
-  // YouTube spend (si no está bloqueado)
-  if (!cfg.skipYt) {
+  // YouTube spend (si no está bloqueado) — no aplica a pais
+  if (dim !== 'pais' && !cfg.skipYt) {
     youtube.forEach(r => {
       let k;
       if (dim === 'fuente') {
@@ -1065,13 +1131,15 @@ async function loadData() {
   document.getElementById('loadingOverlay').style.display = 'flex';
   document.getElementById('errorBanner').style.display = 'none';
   try {
-    [rawLeads, rawVentas, rawMeta, rawYoutube, rawVentAgg, rawVentFuente] = await Promise.all([
+    [rawLeads, rawVentas, rawMeta, rawYoutube, rawVentAgg, rawVentFuente, rawPaisesSpend, rawVentPais] = await Promise.all([
       fetchSheet('leads'),
       fetchSheet('ventas'),
       fetchSheet('meta'),
       fetchYoutube(),
       fetchAggregate('ventas', 'select count(A), sum(F), sum(O)'),
       fetchVentasByFuente(),
+      fetchPaisesSpend(),
+      fetchVentasByPais(),
     ]);
 
     const sample = rawLeads[0] || {};
