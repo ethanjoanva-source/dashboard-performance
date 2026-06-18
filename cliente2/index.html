@@ -538,12 +538,11 @@ function buildVentAdMeta() {
   return result;
 }
 
-// Ventas por Ad filtradas a fuente YouTube — usa rawVentas (ya cargado)
+// Ventas por Ad para YouTube — igual que adMeta, sin filtro de fuente
+// El filtro real lo hace allKeys (solo muestra ads que existen en hoja youtube)
 function buildVentAdYt() {
   const result = {};
-  const ytSrcs = new Set(['youtube', 'yt', 'pagoyoutube']);
   (rawVentas || []).forEach(r => {
-    if (!ytSrcs.has(normStr(r['Fuente'] || '').toLowerCase())) return;
     const ad = normStr(r['Ad'] || '');
     if (!ad) return;
     if (!result[ad]) result[ad] = { ventas: 0, cash: 0, fact: 0 };
@@ -551,6 +550,7 @@ function buildVentAdYt() {
     result[ad].cash += parseNum(r['Cash Collected'] || 0);
     result[ad].fact += parseNum(r['Facturación']    || 0);
   });
+  console.log('[adYt] rawVentAdYt keys:', Object.keys(result).slice(0, 10));
   return result;
 }
 
@@ -759,6 +759,9 @@ function buildRows(dim, leads, ventas, meta, youtube) {
       const code = normAdCode(name);
       if (code && !adCodeToName[code]) adCodeToName[code] = name;
     });
+    console.log('[adYt] adCodeToName:', JSON.stringify(adCodeToName));
+    console.log('[adYt] youtube rows sample:', youtube.slice(0,2).map(r => r['Nombre del anuncio']));
+    console.log('[adYt] rawVentAdYt keys:', Object.keys(rawVentAdYt).slice(0,10));
   }
 
   // Leads
