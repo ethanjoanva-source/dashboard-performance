@@ -1017,7 +1017,7 @@ function renderTable(rows) {
   ];
   const best = {};
   COL_DEF.forEach(({ key, higher }) => {
-    const valid = rows.map(r => r[key]).filter(v => v != null && isFinite(v) && v !== 0);
+    const valid = rows.filter(r => r.camp !== 'Sin atribuir').map(r => r[key]).filter(v => v != null && isFinite(v) && v !== 0);
     if (!valid.length) { best[key] = null; return; }
     const b = higher ? Math.max(...valid) : Math.min(...valid);
     const thr = Math.abs(b) * 0.05;
