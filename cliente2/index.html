@@ -1023,12 +1023,12 @@ function renderTable(rows) {
     const thr = Math.abs(b) * 0.05;
     best[key] = { b, higher, thr };
   });
-  const isBest = (key, val) => {
-    if (val == null || val === 0 || !best[key]) return false;
+  const isBest = (key, val, camp) => {
+    if (val == null || val === 0 || !best[key] || camp === 'Sin atribuir') return false;
     const { b, higher, thr } = best[key];
     return higher ? val >= b - thr : val <= b + thr;
   };
-  const bc = (base, key, val) => base + (isBest(key, val) ? ' best-cell' : '');
+  const bc = (base, key, val, camp) => base + (isBest(key, val, camp) ? ' best-cell' : '');
 
   const tbody = document.getElementById('mainTableBody');
   tbody.innerHTML = '';
@@ -1037,19 +1037,19 @@ function renderTable(rows) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="camp-name" title="${r.camp}">${r.camp}</td>
-      <td class="${bc('val-white','leads',r.leads)}">${fmtN(r.leads)}</td>
-      <td class="${bc('val-white','inversion',r.inversion)}">${fmtC(r.inversion)}</td>
-      <td class="${bc('val-blue','cpl',r.cpl)}">${r.cpl != null ? fmtC(r.cpl) : '—'}</td>
-      <td class="${bc('val-white','ventas',r.ventas)}">${fmtN(r.ventas)}</td>
-      <td class="${bc('val-blue','conv',r.conv)}">${fmtPct(r.conv)}</td>
-      <td class="${bc('val-white','lxv',r.lxv)}">${r.lxv != null ? fmtN(r.lxv, 0) : '—'}</td>
-      <td class="${bc('val-white','cac',r.cac)}">${r.cac != null ? fmtC(r.cac) : '—'}</td>
-      <td class="${bc('val-green','cash',r.cash)}">${fmtC(r.cash)}</td>
-      <td class="${bc('val-green','fact',r.fact)}">${fmtC(r.fact)}</td>
-      <td class="${bc(r.bcash >= 0 ? 'val-green' : 'val-neg','bcash',r.bcash)}">${fmtC(r.bcash)}</td>
-      <td class="${bc(r.brev  >= 0 ? 'val-green' : 'val-neg','brev',r.brev)}">${fmtC(r.brev)}</td>
-      <td class="${bc('val-yellow','roasCash',r.roasCash)}">${fmtX(r.roasCash)}</td>
-      <td class="${bc('val-yellow','roasRev',r.roasRev)}">${fmtX(r.roasRev)}</td>`;
+      <td class="${bc('val-white','leads',r.leads,r.camp)}">${fmtN(r.leads)}</td>
+      <td class="${bc('val-white','inversion',r.inversion,r.camp)}">${fmtC(r.inversion)}</td>
+      <td class="${bc('val-blue','cpl',r.cpl,r.camp)}">${r.cpl != null ? fmtC(r.cpl) : '—'}</td>
+      <td class="${bc('val-white','ventas',r.ventas,r.camp)}">${fmtN(r.ventas)}</td>
+      <td class="${bc('val-blue','conv',r.conv,r.camp)}">${fmtPct(r.conv)}</td>
+      <td class="${bc('val-white','lxv',r.lxv,r.camp)}">${r.lxv != null ? fmtN(r.lxv, 0) : '—'}</td>
+      <td class="${bc('val-white','cac',r.cac,r.camp)}">${r.cac != null ? fmtC(r.cac) : '—'}</td>
+      <td class="${bc('val-green','cash',r.cash,r.camp)}">${fmtC(r.cash)}</td>
+      <td class="${bc('val-green','fact',r.fact,r.camp)}">${fmtC(r.fact)}</td>
+      <td class="${bc(r.bcash >= 0 ? 'val-green' : 'val-neg','bcash',r.bcash,r.camp)}">${fmtC(r.bcash)}</td>
+      <td class="${bc(r.brev  >= 0 ? 'val-green' : 'val-neg','brev',r.brev,r.camp)}">${fmtC(r.brev)}</td>
+      <td class="${bc('val-yellow','roasCash',r.roasCash,r.camp)}">${fmtX(r.roasCash)}</td>
+      <td class="${bc('val-yellow','roasRev',r.roasRev,r.camp)}">${fmtX(r.roasRev)}</td>`;
     tbody.appendChild(tr);
   });
 
