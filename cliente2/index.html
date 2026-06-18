@@ -524,18 +524,37 @@ async function fetchVentasByPais() {
 }
 
 // Ventas agrupadas por Ad — usa rawVentas (ya cargado), sin fetch extra
-function buildVentAdMeta() {
-  const result = {};
-  if (rawVentas && rawVentas[0]) console.log('[debug] cols ventas:', Object.keys(rawVentas[0]));
-  (rawVentas || []).forEach(r => {
-    const ad = normStr(r['Ad'] || '');
-    if (!ad) return;
-    if (!result[ad]) result[ad] = { ventas: 0, cash: 0, fact: 0 };
-    result[ad].ventas++;
-    result[ad].cash += parseNum(r['Cash Collected'] || 0);
-    result[ad].fact += parseNum(r['Facturación']    || 0);
-  });
-  return result;
+// Lee ventas directamente del sheet, detecta columnas por nombre, filtra por fuente Meta
+async function fetchVentasByAdMeta() {
+  try {
+    const res = await fetch(BASE_URL + encodeURIComponent('ventas') + '&tq=select%20*');
+    if (!res.ok) return {};
+    const all = Papa.parse(await res.text(), { header: false }).data;
+    // Buscar la fila de cabecera (primera con celdas no vacías)
+    const hIdx = all.findIndex(r => r.some(c => (c || '').trim() !== ''));
+    if (hIdx < 0) return {};
+    const headers = all[hIdx].map(h => (h || '').trim().toLowerCase());
+    const adIdx   = headers.findIndex(h => h === 'ad');
+    const fIdx    = headers.findIndex(h => h === 'fuente');
+    const cashIdx = headers.findIndex(h => h === 'cash collected');
+    const factIdx = headers.findIndex(h => h.startsWith('factur'));
+    if (adIdx < 0) return {};
+    const result = {};
+    all.slice(hIdx + 1).forEach(r => {
+      if (fIdx >= 0) {
+        const f = (r[fIdx] || '').toLowerCase();
+        if (!f.includes('fb') && !f.includes('ig') && !f.includes('facebook') &&
+            !f.includes('instagram') && !f.includes('meta')) return;
+      }
+      const ad = normStr(r[adIdx] || '');
+      if (!ad) return;
+      if (!result[ad]) result[ad] = { ventas: 0, cash: 0, fact: 0 };
+      result[ad].ventas++;
+      if (cashIdx >= 0) result[ad].cash += parseNum(r[cashIdx] || 0);
+      if (factIdx >= 0) result[ad].fact += parseNum(r[factIdx] || 0);
+    });
+    return result;
+  } catch(e) { return {}; }
 }
 
 // YouTube tiene cabeceras vacías — se parsea sin header y se mapea por índice
@@ -1219,7 +1238,7 @@ async function loadData() {
   document.getElementById('loadingOverlay').style.display = 'flex';
   document.getElementById('errorBanner').style.display = 'none';
   try {
-    [rawLeads, rawVentas, rawMeta, rawYoutube, rawVentAgg, rawVentFuente, rawPaisesSpend, rawVentPais] = await Promise.all([
+    [rawLeads, rawVentas, rawMeta, rawYoutube, rawVentAgg, rawVentFuente, rawPaisesSpend, rawVentPais, rawVentAdMeta] = await Promise.all([
       fetchSheet('leads'),
       fetchSheet('ventas'),
       fetchSheet('meta'),
@@ -1228,8 +1247,8 @@ async function loadData() {
       fetchVentasByFuente(),
       fetchPaisesSpend(),
       fetchVentasByPais(),
+      fetchVentasByAdMeta(),
     ]);
-    rawVentAdMeta = buildVentAdMeta(); // sincrónico, usa rawVentas ya cargado
 
     const sample = rawLeads[0] || {};
     leadsHasDate = !!(sample['Fecha'] || sample['fecha'] || sample['Timestamp'] || sample['Data de conversão']);
