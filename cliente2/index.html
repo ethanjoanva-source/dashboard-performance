@@ -336,7 +336,8 @@ let rawVentAgg = null;
 let rawVentFuente = {}; // ventas pre-agregadas por Fuente desde GViz
 let rawPaisesSpend = {}; // gasto Meta+YouTube por País desde hoja "paises"
 let rawVentPais = {};    // ventas pre-agregadas por País desde GViz
-let rawVentAdMeta = {};  // ventas pre-agregadas por Ad (solo fuente Meta) desde GViz
+let rawVentAdMeta = {};  // ventas por Ad (fuente Meta) desde rawVentas
+let rawVentAdYt   = {};  // ventas por Ad (fuente YouTube) desde rawVentas
 let activeRange = 'all', activeSource = 'all';
 let activeCampaign = 'all', activeAd = 'all';
 let dateFrom = null, dateTo = null;
@@ -527,6 +528,22 @@ async function fetchVentasByPais() {
 function buildVentAdMeta() {
   const result = {};
   (rawVentas || []).forEach(r => {
+    const ad = normStr(r['Ad'] || '');
+    if (!ad) return;
+    if (!result[ad]) result[ad] = { ventas: 0, cash: 0, fact: 0 };
+    result[ad].ventas++;
+    result[ad].cash += parseNum(r['Cash Collected'] || 0);
+    result[ad].fact += parseNum(r['Facturación']    || 0);
+  });
+  return result;
+}
+
+// Ventas por Ad filtradas a fuente YouTube — usa rawVentas (ya cargado)
+function buildVentAdYt() {
+  const result = {};
+  const ytSrcs = new Set(['youtube', 'yt', 'pagoyoutube']);
+  (rawVentas || []).forEach(r => {
+    if (!ytSrcs.has(normStr(r['Fuente'] || '').toLowerCase())) return;
     const ad = normStr(r['Ad'] || '');
     if (!ad) return;
     if (!result[ad]) result[ad] = { ventas: 0, cash: 0, fact: 0 };
@@ -728,9 +745,16 @@ function buildRows(dim, leads, ventas, meta, youtube) {
   const destPais = k => (paisesCanonicos && !paisesCanonicos.has(k)) ? 'Otros' : k;
 
   // Para dim 'adMeta': mapa ADx → nombre completo del anuncio (desde hoja meta)
+  // Mapa ADx → nombre completo: desde meta (adMeta) o desde youtube (adYt)
   const adCodeToName = {};
   if (dim === 'adMeta') {
     meta.forEach(r => {
+      const name = normStr(r['Nombre del anuncio'] || '');
+      const code = normAdCode(name);
+      if (code && !adCodeToName[code]) adCodeToName[code] = name;
+    });
+  } else if (dim === 'adYt') {
+    youtube.forEach(r => {
       const name = normStr(r['Nombre del anuncio'] || '');
       const code = normAdCode(name);
       if (code && !adCodeToName[code]) adCodeToName[code] = name;
@@ -741,10 +765,18 @@ function buildRows(dim, leads, ventas, meta, youtube) {
   if (cfg.leadKey) {
     leads.forEach(r => {
       if (dim === 'adMeta') {
-        // Solo leads de fuente Meta
         const src = normStr(r['utm_source'] || '').toLowerCase();
         if (src !== 'fb' && src !== 'ig' && !src.startsWith('facebook') && !src.startsWith('instagram')) return;
-        // Mapear ADx del utm_term al nombre completo del anuncio
+        const term = normStr(r['utm_term'] || '');
+        const code = normAdCode(term);
+        const k = (code && adCodeToName[code]) || term;
+        if (!k) return;
+        byLeads[k] = (byLeads[k] || 0) + 1;
+        return;
+      }
+      if (dim === 'adYt') {
+        const src = normStr(r['utm_source'] || '').toLowerCase();
+        if (src !== 'youtube' && src !== 'yt' && !src.startsWith('youtube')) return;
         const term = normStr(r['utm_term'] || '');
         const code = normAdCode(term);
         const k = (code && adCodeToName[code]) || term;
@@ -772,8 +804,17 @@ function buildRows(dim, leads, ventas, meta, youtube) {
         byVent[dest].fact  += data.fact;
       });
     } else if (dim === 'adMeta') {
-      // Ventas pre-agregadas por Ad desde GViz; mapear ADx → nombre completo del anuncio
       Object.entries(rawVentAdMeta).forEach(([ad, data]) => {
+        const code = normAdCode(ad);
+        const k = (code && adCodeToName[code]) || normStr(ad);
+        if (!k) return;
+        if (!byVent[k]) byVent[k] = { ventas: 0, cash: 0, fact: 0 };
+        byVent[k].ventas += data.ventas;
+        byVent[k].cash  += data.cash;
+        byVent[k].fact  += data.fact;
+      });
+    } else if (dim === 'adYt') {
+      Object.entries(rawVentAdYt).forEach(([ad, data]) => {
         const code = normAdCode(ad);
         const k = (code && adCodeToName[code]) || normStr(ad);
         if (!k) return;
@@ -830,8 +871,8 @@ function buildRows(dim, leads, ventas, meta, youtube) {
     ...Object.keys(bySpend),
   ])].filter(k => {
     if (!k || isTemplate(k) || k === 'Sin atribuir') return false;
-    // Para Ad Meta: solo mostrar ads que existen en la hoja meta (tienen gasto registrado)
-    if (dim === 'adMeta') return !!bySpend[k];
+    // Para Ad Meta y Ad YouTube: solo mostrar ads que existen en la hoja respectiva
+    if (dim === 'adMeta' || dim === 'adYt') return !!bySpend[k];
     return true;
   });
 
@@ -921,7 +962,7 @@ function render() {
 
   const rows = buildRows(activeDim, leads, ventas, meta, youtube);
   // Para adMeta: el total de leads es la suma de la tabla (solo leads Meta), no todos los leads
-  const displayLeads = activeDim === 'adMeta' ? rows.reduce((s, r) => s + r.leads, 0) : totalLeads;
+  const displayLeads = (activeDim === 'adMeta' || activeDim === 'adYt') ? rows.reduce((s, r) => s + r.leads, 0) : totalLeads;
   renderTable(rows, displayLeads, totalVentas, totalInv, totalCash, totalFact);
   renderCharts(rows);
 }
@@ -1228,7 +1269,8 @@ async function loadData() {
       fetchPaisesSpend(),
       fetchVentasByPais(),
     ]);
-    rawVentAdMeta = buildVentAdMeta(); // sincrónico, usa rawVentas ya cargado
+    rawVentAdMeta = buildVentAdMeta();
+    rawVentAdYt   = buildVentAdYt();
 
     const sample = rawLeads[0] || {};
     leadsHasDate = !!(sample['Fecha'] || sample['fecha'] || sample['Timestamp'] || sample['Data de conversão']);
