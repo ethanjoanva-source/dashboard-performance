@@ -609,7 +609,19 @@ function buildRows(dim, leads, ventas, meta, youtube) {
   // Ventas
   if (cfg.ventKey) {
     ventas.forEach(r => {
-      const k = normKey(dim, normStr(r[cfg.ventKey])) || 'Sin atribuir';
+      let k;
+      if (dim === 'fuente') {
+        const fuente = normStr(r['Fuente'] || '');
+        if (fuente) {
+          k = normKey(dim, fuente);
+        } else {
+          // Fuente vacía: si la Campaña es solo números es una venta de YouTube
+          const camp = normStr(r['Campaña'] || '');
+          k = /^[\d.,\s]+$/.test(camp) ? 'YouTube' : 'Desconocido';
+        }
+      } else {
+        k = normKey(dim, normStr(r[cfg.ventKey])) || 'Sin atribuir';
+      }
       if (!byVent[k]) byVent[k] = { ventas: 0, cash: 0, fact: 0 };
       byVent[k].ventas++;
       byVent[k].cash += parseNum(r['Cash Collected'] || 0);
