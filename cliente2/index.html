@@ -609,6 +609,7 @@ function buildRows(dim, leads, ventas, meta, youtube) {
 
   // Ventas
   if (cfg.ventKey) {
+    if (dim === 'fuente') console.log('[DEBUG] ventas fuente sample:', ventas.slice(0,3).map(r => ({fuente: r['Fuente'], camp: r['Campaña']})));
     ventas.forEach(r => {
       let k;
       if (dim === 'fuente') {
@@ -628,6 +629,7 @@ function buildRows(dim, leads, ventas, meta, youtube) {
       byVent[k].cash += parseNum(r['Cash Collected'] || 0);
       byVent[k].fact += parseNum(r['Facturación'] || 0);
     });
+    if (dim === 'fuente') console.log('[DEBUG] byVent fuente:', JSON.stringify(Object.fromEntries(Object.entries(byVent).map(([k,v])=>[k,v.ventas]))));
   }
 
   // Meta spend (si no está bloqueado y tiene metaKey)
