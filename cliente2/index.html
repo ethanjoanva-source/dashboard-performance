@@ -333,6 +333,7 @@ const SOURCE_MAP = {
 // ── STATE ──────────────────────────────────────────────────────────────
 let rawLeads = [], rawVentas = [], rawMeta = [], rawYoutube = [];
 let rawVentAgg = null;
+let rawVentFuente = {}; // ventas pre-agregadas por Fuente desde GViz
 let activeRange = 'all', activeSource = 'all';
 let activeCampaign = 'all', activeAd = 'all';
 let dateFrom = null, dateTo = null;
@@ -419,6 +420,38 @@ async function fetchAggregate(sheetName, tq) {
   if (!res.ok) return null;
   const rows = Papa.parse(await res.text(), { header: true, skipEmptyLines: true }).data;
   return rows[0] || null;
+}
+
+// Ventas agrupadas por Fuente usando GViz query (evita problemas de PapaParse con columnas)
+async function fetchVentasByFuente() {
+  const tq = 'select W, count(A), sum(F), sum(O) group by W';
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=ventas&tq=${encodeURIComponent(tq)}`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return {};
+    const text = (await res.text()).split('\n').filter(l => l.trim()).join('\n');
+    const rows = Papa.parse(text, { header: true, skipEmptyLines: true }).data;
+    const result = {};
+    rows.forEach(row => {
+      const vals = Object.values(row);
+      const f = (vals[0] || '').trim().toLowerCase();
+      const count = parseInt(vals[1] || 0) || 0;
+      const cash  = parseNum(vals[2] || 0);
+      const fact  = parseNum(vals[3] || 0);
+      let cat;
+      if (f === 'fb' || f.startsWith('facebook'))              cat = 'Facebook';
+      else if (f === 'ig' || f.startsWith('instagram'))        cat = 'Instagram';
+      else if (f === 'pagoyoutube' || f === 'youtube' || f === 'yt') cat = 'YouTube';
+      else if (f === 'organico' || f === 'orgánico' || f === 'organic') cat = 'Orgánico';
+      else if (f === 'afiliado')                               cat = 'Afiliado';
+      else                                                     cat = 'Desconocido';
+      if (!result[cat]) result[cat] = { ventas: 0, cash: 0, fact: 0 };
+      result[cat].ventas += count;
+      result[cat].cash  += cash;
+      result[cat].fact  += fact;
+    });
+    return result;
+  } catch(e) { return {}; }
 }
 
 // YouTube tiene cabeceras vacías — se parsea sin header y se mapea por índice
@@ -611,34 +644,20 @@ function buildRows(dim, leads, ventas, meta, youtube) {
 
   // Ventas
   if (cfg.ventKey) {
-    if (dim === 'fuente' && ventas.length > 0) console.log('[DBG] ventas[0] keys+Fuente:', Object.keys(ventas[0]).slice(20,26), '| Fuente=', ventas[0]['Fuente'], '| row:', JSON.stringify(ventas[0]).substring(0,300));
-    ventas.forEach(r => {
-      let k;
-      if (dim === 'fuente') {
-        // Buscar el valor de Fuente sin importar cómo PapaParse nombró la columna
-        const fRaw = r['Fuente'] ?? r['fuente'] ??
-          (Object.entries(r).find(([k]) => k.trim().toLowerCase() === 'fuente') || [])[1] ?? '';
-        const f = fRaw.trim().toLowerCase();
-        if (f === 'fb' || f.startsWith('facebook'))        k = 'Facebook';
-        else if (f === 'ig' || f.startsWith('instagram'))  k = 'Instagram';
-        else if (f === 'pagoyoutube' || f === 'youtube' || f === 'yt') k = 'YouTube';
-        else if (f === 'organico' || f === 'orgánico' || f === 'organic') k = 'Orgánico';
-        else if (f === 'afiliado')                         k = 'Afiliado';
-        else if (!f) {
-          // Fuente vacía: detectar YouTube por campaña numérica
-          const campRaw = r['Campaña'] ?? r['Campana'] ??
-            (Object.entries(r).find(([k]) => /campa/i.test(k)) || [])[1] ?? '';
-          k = /^[\d.,\s]+$/.test(campRaw.trim()) ? 'YouTube' : 'Desconocido';
-        }
-        else k = 'Desconocido';
-      } else {
-        k = normKey(dim, normStr(r[cfg.ventKey])) || 'Sin atribuir';
-      }
-      if (!byVent[k]) byVent[k] = { ventas: 0, cash: 0, fact: 0 };
-      byVent[k].ventas++;
-      byVent[k].cash += parseNum(r['Cash Collected'] || 0);
-      byVent[k].fact += parseNum(r['Facturación'] || 0);
-    });
+    if (dim === 'fuente') {
+      // Usar datos pre-agregados por GViz para evitar problemas de columnas con PapaParse
+      Object.entries(rawVentFuente).forEach(([cat, data]) => {
+        byVent[cat] = { ventas: data.ventas, cash: data.cash, fact: data.fact };
+      });
+    } else {
+      ventas.forEach(r => {
+        const k = normKey(dim, normStr(r[cfg.ventKey])) || 'Sin atribuir';
+        if (!byVent[k]) byVent[k] = { ventas: 0, cash: 0, fact: 0 };
+        byVent[k].ventas++;
+        byVent[k].cash += parseNum(r['Cash Collected'] || 0);
+        byVent[k].fact += parseNum(r['Facturación'] || 0);
+      });
+    }
   }
 
   // Meta spend (si no está bloqueado y tiene metaKey)
@@ -1046,12 +1065,13 @@ async function loadData() {
   document.getElementById('loadingOverlay').style.display = 'flex';
   document.getElementById('errorBanner').style.display = 'none';
   try {
-    [rawLeads, rawVentas, rawMeta, rawYoutube, rawVentAgg] = await Promise.all([
+    [rawLeads, rawVentas, rawMeta, rawYoutube, rawVentAgg, rawVentFuente] = await Promise.all([
       fetchSheet('leads'),
       fetchSheet('ventas'),
       fetchSheet('meta'),
       fetchYoutube(),
       fetchAggregate('ventas', 'select count(A), sum(F), sum(O)'),
+      fetchVentasByFuente(),
     ]);
 
     const sample = rawLeads[0] || {};
