@@ -612,7 +612,10 @@ function buildRows(dim, leads, ventas, meta, youtube) {
     ventas.forEach(r => {
       let k;
       if (dim === 'fuente') {
-        const f = (r['Fuente'] || '').trim().toLowerCase();
+        // Buscar el valor de Fuente sin importar cómo PapaParse nombró la columna
+        const fRaw = r['Fuente'] ?? r['fuente'] ??
+          (Object.entries(r).find(([k]) => k.trim().toLowerCase() === 'fuente') || [])[1] ?? '';
+        const f = fRaw.trim().toLowerCase();
         if (f === 'fb' || f.startsWith('facebook'))        k = 'Facebook';
         else if (f === 'ig' || f.startsWith('instagram'))  k = 'Instagram';
         else if (f === 'pagoyoutube' || f === 'youtube' || f === 'yt') k = 'YouTube';
@@ -620,8 +623,9 @@ function buildRows(dim, leads, ventas, meta, youtube) {
         else if (f === 'afiliado')                         k = 'Afiliado';
         else if (!f) {
           // Fuente vacía: detectar YouTube por campaña numérica
-          const camp = normStr(r['Campaña'] || '');
-          k = /^[\d.,\s]+$/.test(camp) ? 'YouTube' : 'Desconocido';
+          const campRaw = r['Campaña'] ?? r['Campana'] ??
+            (Object.entries(r).find(([k]) => /campa/i.test(k)) || [])[1] ?? '';
+          k = /^[\d.,\s]+$/.test(campRaw.trim()) ? 'YouTube' : 'Desconocido';
         }
         else k = 'Desconocido';
       } else {
@@ -1051,6 +1055,8 @@ async function loadData() {
     leadsHasDate = !!(sample['Fecha'] || sample['fecha'] || sample['Timestamp'] || sample['Data de conversão']);
     document.getElementById('notaLeads').style.display = leadsHasDate ? 'none' : 'block';
 
+    console.log('[DEBUG] ventas keys:', Object.keys(rawVentas[0] || {}));
+    console.log('[DEBUG] ventas row0:', rawVentas[0]);
     populateSelects();
 
     const now = new Date();
