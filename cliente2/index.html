@@ -160,6 +160,7 @@
     td.val-yellow { color: var(--accent-yellow); }
     td.val-neg    { color: #f87171; }
     td.camp-name  { color: var(--text); font-weight: 500; }
+    td.best-cell  { background: rgba(52,211,153,0.18) !important; border-radius: 4px; }
 
     .loading-overlay {
       position: fixed; inset: 0; background: rgba(7,7,26,0.92);
@@ -998,6 +999,37 @@ function renderTable(rows) {
     if (th.dataset.col === sortCol) th.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
   });
 
+  // Calcular mejor valor por columna (true = mayor es mejor, false = menor es mejor)
+  const COL_DEF = [
+    { key: 'leads',    higher: true  },
+    { key: 'inversion',higher: true  },
+    { key: 'cpl',      higher: false },
+    { key: 'ventas',   higher: true  },
+    { key: 'conv',     higher: true  },
+    { key: 'lxv',      higher: false },
+    { key: 'cac',      higher: false },
+    { key: 'cash',     higher: true  },
+    { key: 'fact',     higher: true  },
+    { key: 'bcash',    higher: true  },
+    { key: 'brev',     higher: true  },
+    { key: 'roasCash', higher: true  },
+    { key: 'roasRev',  higher: true  },
+  ];
+  const best = {};
+  COL_DEF.forEach(({ key, higher }) => {
+    const valid = rows.map(r => r[key]).filter(v => v != null && isFinite(v) && v !== 0);
+    if (!valid.length) { best[key] = null; return; }
+    const b = higher ? Math.max(...valid) : Math.min(...valid);
+    const thr = Math.abs(b) * 0.05;
+    best[key] = { b, higher, thr };
+  });
+  const isBest = (key, val) => {
+    if (val == null || !best[key]) return false;
+    const { b, higher, thr } = best[key];
+    return higher ? val >= b - thr : val <= b + thr;
+  };
+  const bc = (base, key, val) => base + (isBest(key, val) ? ' best-cell' : '');
+
   const tbody = document.getElementById('mainTableBody');
   tbody.innerHTML = '';
 
@@ -1005,19 +1037,19 @@ function renderTable(rows) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="camp-name" title="${r.camp}">${r.camp}</td>
-      <td class="val-white">${fmtN(r.leads)}</td>
-      <td class="val-white">${fmtC(r.inversion)}</td>
-      <td class="val-blue">${r.cpl != null ? fmtC(r.cpl) : '—'}</td>
-      <td class="val-white">${fmtN(r.ventas)}</td>
-      <td class="val-blue">${fmtPct(r.conv)}</td>
-      <td class="val-white">${r.lxv != null ? fmtN(r.lxv, 0) : '—'}</td>
-      <td class="val-white">${r.cac != null ? fmtC(r.cac) : '—'}</td>
-      <td class="val-green">${fmtC(r.cash)}</td>
-      <td class="val-green">${fmtC(r.fact)}</td>
-      <td class="${r.bcash >= 0 ? 'val-green' : 'val-neg'}">${fmtC(r.bcash)}</td>
-      <td class="${r.brev  >= 0 ? 'val-green' : 'val-neg'}">${fmtC(r.brev)}</td>
-      <td class="val-yellow">${fmtX(r.roasCash)}</td>
-      <td class="val-yellow">${fmtX(r.roasRev)}</td>`;
+      <td class="${bc('val-white','leads',r.leads)}">${fmtN(r.leads)}</td>
+      <td class="${bc('val-white','inversion',r.inversion)}">${fmtC(r.inversion)}</td>
+      <td class="${bc('val-blue','cpl',r.cpl)}">${r.cpl != null ? fmtC(r.cpl) : '—'}</td>
+      <td class="${bc('val-white','ventas',r.ventas)}">${fmtN(r.ventas)}</td>
+      <td class="${bc('val-blue','conv',r.conv)}">${fmtPct(r.conv)}</td>
+      <td class="${bc('val-white','lxv',r.lxv)}">${r.lxv != null ? fmtN(r.lxv, 0) : '—'}</td>
+      <td class="${bc('val-white','cac',r.cac)}">${r.cac != null ? fmtC(r.cac) : '—'}</td>
+      <td class="${bc('val-green','cash',r.cash)}">${fmtC(r.cash)}</td>
+      <td class="${bc('val-green','fact',r.fact)}">${fmtC(r.fact)}</td>
+      <td class="${bc(r.bcash >= 0 ? 'val-green' : 'val-neg','bcash',r.bcash)}">${fmtC(r.bcash)}</td>
+      <td class="${bc(r.brev  >= 0 ? 'val-green' : 'val-neg','brev',r.brev)}">${fmtC(r.brev)}</td>
+      <td class="${bc('val-yellow','roasCash',r.roasCash)}">${fmtX(r.roasCash)}</td>
+      <td class="${bc('val-yellow','roasRev',r.roasRev)}">${fmtX(r.roasRev)}</td>`;
     tbody.appendChild(tr);
   });
 
