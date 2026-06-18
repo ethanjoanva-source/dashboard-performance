@@ -524,31 +524,39 @@ async function fetchVentasByPais() {
   } catch(e) { return {}; }
 }
 
-// Ventas agrupadas por Ad — usa rawVentas (ya cargado), sin fetch extra
+// Encuentra la clave exacta de una columna en rawVentas (case-insensitive)
+function ventCol(name) {
+  if (!rawVentas || !rawVentas[0]) return name;
+  return Object.keys(rawVentas[0]).find(k => k.trim().toLowerCase() === name.toLowerCase()) || name;
+}
+
+// Ventas filtradas a fuente Meta (fb/ig/facebook/instagram), agrupadas por Ad
 function buildVentAdMeta() {
+  const adKey = ventCol('ad');
+  const fKey  = ventCol('fuente');
   const result = {};
-  if (rawVentas && rawVentas[0]) {
-    const keys = Object.keys(rawVentas[0]);
-    console.log('[adMeta] columnas ventas:', keys.slice(0, 20));
-  }
   (rawVentas || []).forEach(r => {
-    const ad = normStr(r['Ad'] || '');
+    const f = normStr(r[fKey] || '').toLowerCase();
+    if (!f.includes('fb') && !f.includes('ig') && !f.includes('facebook') && !f.includes('instagram') && !f.includes('meta')) return;
+    const ad = normStr(r[adKey] || '');
     if (!ad) return;
     if (!result[ad]) result[ad] = { ventas: 0, cash: 0, fact: 0 };
     result[ad].ventas++;
     result[ad].cash += parseNum(r['Cash Collected'] || 0);
     result[ad].fact += parseNum(r['Facturación']    || 0);
   });
-  console.log('[adMeta] rawVentAdMeta keys:', Object.keys(result).slice(0, 10));
   return result;
 }
 
-// Ventas por Ad para YouTube — igual que adMeta, sin filtro de fuente
-// El filtro real lo hace allKeys (solo muestra ads que existen en hoja youtube)
+// Ventas filtradas a fuente YouTube, agrupadas por Ad
 function buildVentAdYt() {
+  const adKey = ventCol('ad');
+  const fKey  = ventCol('fuente');
   const result = {};
   (rawVentas || []).forEach(r => {
-    const ad = normStr(r['Ad'] || '');
+    const f = normStr(r[fKey] || '').toLowerCase();
+    if (!f.includes('youtube') && !f.includes(' yt') && f !== 'yt') return;
+    const ad = normStr(r[adKey] || '');
     if (!ad) return;
     if (!result[ad]) result[ad] = { ventas: 0, cash: 0, fact: 0 };
     result[ad].ventas++;
