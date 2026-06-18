@@ -460,9 +460,13 @@ async function fetchVentasByFuente() {
 async function fetchPaisesSpend() {
   try {
     const res = await fetch(BASE_URL + encodeURIComponent('paises') + '&tq=select%20*');
-    if (!res.ok) return {};
-    const text = (await res.text()).split('\n').filter(l => l.trim()).join('\n');
+    console.log('[Paises] HTTP status:', res.status, res.ok);
+    if (!res.ok) { console.warn('[Paises] fetch falló'); return {}; }
+    const raw = await res.text();
+    console.log('[Paises] primeras 300 chars:', raw.slice(0, 300));
+    const text = raw.split('\n').filter(l => l.trim()).join('\n');
     const rows = Papa.parse(text, { header: false, skipEmptyLines: true }).data;
+    console.log('[Paises] total filas:', rows.length, '| fila0:', rows[0]);
     const result = {};
     rows.slice(1).forEach(row => {  // slice(1) omite fila de encabezado
       const metaPais = (row[0] || '').trim();
@@ -478,8 +482,9 @@ async function fetchPaisesSpend() {
         result[norm].ytSpend += parseNum(row[6] || 0);    // col6 = $ YouTube
       }
     });
+    console.log('[Paises] resultado final:', JSON.stringify(result));
     return result;
-  } catch(e) { return {}; }
+  } catch(e) { console.error('[Paises] error:', e); return {}; }
 }
 
 // Ventas agrupadas por País usando GViz query (columna E en hoja ventas)
