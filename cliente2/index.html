@@ -487,6 +487,7 @@ async function fetchPaisesSpend() {
   } catch(e) { console.error('[Paises] error:', e); return {}; }
 }
 
+
 // Ventas agrupadas por País usando GViz query (columna E en hoja ventas)
 async function fetchVentasByPais() {
   const tq = 'select E, count(A), sum(F), sum(O) group by E';
@@ -496,21 +497,23 @@ async function fetchVentasByPais() {
     if (!res.ok) return {};
     const text = (await res.text()).split('\n').filter(l => l.trim()).join('\n');
     const rows = Papa.parse(text, { header: true, skipEmptyLines: true }).data;
+    console.log('[VentPais] filas:', rows.length, '| primera:', JSON.stringify(rows[0]));
     const result = {};
     rows.forEach(row => {
       const vals = Object.values(row);
       const pais = normKey('pais', (vals[0] || '').trim());
       if (!pais || pais === 'Sin atribuir') return;
       const count = parseInt(vals[1] || 0) || 0;
-      const cash  = parseFloat(vals[2] || 0) || 0;  // GViz devuelve punto decimal inglés
+      const cash  = parseFloat(vals[2] || 0) || 0;
       const fact  = parseFloat(vals[3] || 0) || 0;
       if (!result[pais]) result[pais] = { ventas: 0, cash: 0, fact: 0 };
       result[pais].ventas += count;
       result[pais].cash  += cash;
       result[pais].fact  += fact;
     });
+    console.log('[VentPais] resultado:', JSON.stringify(result));
     return result;
-  } catch(e) { return {}; }
+  } catch(e) { console.error('[VentPais] error:', e); return {}; }
 }
 
 // YouTube tiene cabeceras vacías — se parsea sin header y se mapea por índice
@@ -709,6 +712,8 @@ function buildRows(dim, leads, ventas, meta, youtube) {
         byVent[cat] = { ventas: data.ventas, cash: data.cash, fact: data.fact };
       });
     } else if (dim === 'pais') {
+      console.log('[buildRows pais] rawVentPais:', JSON.stringify(rawVentPais));
+      console.log('[buildRows pais] rawPaisesSpend:', JSON.stringify(rawPaisesSpend));
       // Usar datos pre-agregados por GViz agrupados por País
       Object.entries(rawVentPais).forEach(([pais, data]) => {
         byVent[pais] = { ventas: data.ventas, cash: data.cash, fact: data.fact };
