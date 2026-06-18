@@ -422,7 +422,7 @@ function fmtN(n, dec = 0) {
   if (n == null || isNaN(n)) return '—';
   return n.toLocaleString('es-AR', { minimumFractionDigits: dec, maximumFractionDigits: dec });
 }
-function fmtPct(n) { return n == null || isNaN(n) ? '—' : fmtN(n, 1) + '%'; }
+function fmtPct(n) { return n == null || isNaN(n) ? '—' : fmtN(n, 2) + '%'; }
 function fmtX(n)   { return n == null || isNaN(n) || !isFinite(n) ? '—' : fmtN(n, 2) + 'x'; }
 
 function today() { const d = new Date(); d.setHours(0,0,0,0); return d; }
