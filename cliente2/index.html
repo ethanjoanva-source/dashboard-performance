@@ -336,6 +336,7 @@ let rawVentAgg = null;
 let rawVentFuente = {}; // ventas pre-agregadas por Fuente desde GViz
 let rawPaisesSpend = {}; // gasto Meta+YouTube por País desde hoja "paises"
 let rawVentPais = {};    // ventas pre-agregadas por País desde GViz
+let rawVentAdMeta = {};  // ventas pre-agregadas por Ad (solo fuente Meta) desde GViz
 let activeRange = 'all', activeSource = 'all';
 let activeCampaign = 'all', activeAd = 'all';
 let dateFrom = null, dateTo = null;
@@ -346,6 +347,13 @@ let sortCol = 'leads', sortDir = 'desc';
 // ── UTILS ──────────────────────────────────────────────────────────────
 function normStr(s) { return (s || '').replace(/\\\//g, '/').trim(); }
 function isTemplate(s) { return /^\{\{.*\}\}$/.test((s || '').trim()); }
+
+// Convierte índice 0-based a letra de columna GViz (0→A, 25→Z, 26→AA…)
+function colLetter(idx) {
+  let r = '', n = idx + 1;
+  while (n > 0) { n--; r = String.fromCharCode(65 + n % 26) + r; n = Math.floor(n / 26); }
+  return r;
+}
 
 function parseNum(val) {
   if (!val && val !== 0) return 0;
@@ -504,6 +512,44 @@ async function fetchVentasByPais() {
       result[pais].ventas += count;
       result[pais].cash  += cash;
       result[pais].fact  += fact;
+    });
+    return result;
+  } catch(e) { return {}; }
+}
+
+// Ventas agrupadas por Ad (solo fuente Meta) usando GViz — descubre columna "Ad" dinámicamente
+async function fetchVentasByAdMeta() {
+  try {
+    // Paso 1: encabezados de ventas para encontrar la columna "Ad"
+    const hdrUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=ventas&tq=${encodeURIComponent('select * limit 1')}`;
+    const hdrRes = await fetch(hdrUrl);
+    if (!hdrRes.ok) return {};
+    const hdrText = (await hdrRes.text()).split('\n').filter(l => l.trim()).join('\n');
+    const allHdrRows = Papa.parse(hdrText, { header: false, skipEmptyLines: true }).data;
+    const headers = allHdrRows[0] || [];
+    const adIdx = headers.findIndex(h => h.trim().toLowerCase() === 'ad');
+    if (adIdx < 0) return {};
+    const adCol = colLetter(adIdx);
+
+    // Paso 2: query agrupada por Ad, filtrada a fuente Meta
+    const tq = `select ${adCol}, count(A), sum(F), sum(O) where W matches '(?i)^(fb|ig|facebook|instagram).*' group by ${adCol}`;
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=ventas&tq=${encodeURIComponent(tq)}`;
+    const res = await fetch(url);
+    if (!res.ok) return {};
+    const text = (await res.text()).split('\n').filter(l => l.trim()).join('\n');
+    const rows = Papa.parse(text, { header: true, skipEmptyLines: true }).data;
+    const result = {};
+    rows.forEach(row => {
+      const vals = Object.values(row);
+      const ad = normStr(vals[0] || '');
+      if (!ad) return;
+      const count = parseInt(vals[1]  || 0) || 0;
+      const cash  = parseFloat(vals[2] || 0) || 0;
+      const fact  = parseFloat(vals[3] || 0) || 0;
+      if (!result[ad]) result[ad] = { ventas: 0, cash: 0, fact: 0 };
+      result[ad].ventas += count;
+      result[ad].cash  += cash;
+      result[ad].fact  += fact;
     });
     return result;
   } catch(e) { return {}; }
@@ -699,9 +745,13 @@ function buildRows(dim, leads, ventas, meta, youtube) {
   const paisesCanonicos = dim === 'pais' ? new Set(Object.keys(rawPaisesSpend)) : null;
   const destPais = k => (paisesCanonicos && !paisesCanonicos.has(k)) ? 'Otros' : k;
 
-  // Leads
+  // Leads — para adMeta solo fuente Meta (fb/ig)
   if (cfg.leadKey) {
     leads.forEach(r => {
+      if (dim === 'adMeta') {
+        const src = normStr(r['utm_source'] || '').toLowerCase();
+        if (src !== 'fb' && src !== 'ig' && !src.startsWith('facebook') && !src.startsWith('instagram')) return;
+      }
       const k = destPais(normKey(dim, normStr(r[cfg.leadKey])) || 'Sin atribuir');
       byLeads[k] = (byLeads[k] || 0) + 1;
     });
@@ -710,18 +760,21 @@ function buildRows(dim, leads, ventas, meta, youtube) {
   // Ventas
   if (cfg.ventKey) {
     if (dim === 'fuente') {
-      // Usar datos pre-agregados por GViz para evitar problemas de columnas con PapaParse
       Object.entries(rawVentFuente).forEach(([cat, data]) => {
         byVent[cat] = { ventas: data.ventas, cash: data.cash, fact: data.fact };
       });
     } else if (dim === 'pais') {
-      // Usar datos pre-agregados por GViz; agrupar países fuera del Sheets en "Otros"
       Object.entries(rawVentPais).forEach(([pais, data]) => {
         const dest = destPais(pais);
         if (!byVent[dest]) byVent[dest] = { ventas: 0, cash: 0, fact: 0 };
         byVent[dest].ventas += data.ventas;
         byVent[dest].cash  += data.cash;
         byVent[dest].fact  += data.fact;
+      });
+    } else if (dim === 'adMeta') {
+      // Ventas pre-agregadas por Ad (solo fuente Meta) desde GViz
+      Object.entries(rawVentAdMeta).forEach(([ad, data]) => {
+        byVent[ad] = { ventas: data.ventas, cash: data.cash, fact: data.fact };
       });
     } else {
       ventas.forEach(r => {
@@ -1151,7 +1204,7 @@ async function loadData() {
   document.getElementById('loadingOverlay').style.display = 'flex';
   document.getElementById('errorBanner').style.display = 'none';
   try {
-    [rawLeads, rawVentas, rawMeta, rawYoutube, rawVentAgg, rawVentFuente, rawPaisesSpend, rawVentPais] = await Promise.all([
+    [rawLeads, rawVentas, rawMeta, rawYoutube, rawVentAgg, rawVentFuente, rawPaisesSpend, rawVentPais, rawVentAdMeta] = await Promise.all([
       fetchSheet('leads'),
       fetchSheet('ventas'),
       fetchSheet('meta'),
@@ -1160,6 +1213,7 @@ async function loadData() {
       fetchVentasByFuente(),
       fetchPaisesSpend(),
       fetchVentasByPais(),
+      fetchVentasByAdMeta(),
     ]);
 
     const sample = rawLeads[0] || {};
