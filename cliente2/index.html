@@ -575,6 +575,7 @@ async function fetchYoutube() {
         'Nombre del anuncio': normStr(row[5] || ''),
         'Inversión':          row[7] || '0',
         'Pais':               normStr(row[20] || ''),
+        'AdId':               normStr(row[2] || ''),  // ID numérico del anuncio (coincide con utm_term del lead)
       }))
       .filter(r => r['Campaña'] && !isTemplate(r['Campaña']) && /^(AD\d|MIXAD)/i.test(r['Nombre del anuncio']));
   } catch(e) { return []; }
@@ -767,6 +768,15 @@ function buildRows(dim, leads, ventas, meta, youtube) {
       if (code && !adCodeToName[code]) adCodeToName[code] = name;
     });
   }
+  // Para adYt: mapa ID numérico del anuncio → nombre (utm_term del lead es el ID numérico)
+  const adIdToName = {};
+  if (dim === 'adYt') {
+    youtube.forEach(r => {
+      const id   = normStr(r['AdId'] || '');
+      const name = normStr(r['Nombre del anuncio'] || '');
+      if (id && name && !adIdToName[id]) adIdToName[id] = name;
+    });
+  }
 
   // Leads
   if (cfg.leadKey) {
@@ -784,9 +794,10 @@ function buildRows(dim, leads, ventas, meta, youtube) {
       if (dim === 'adYt') {
         const src = normStr(r['utm_source'] || '').toLowerCase();
         if (!src.includes('youtube') && src !== 'yt') return;
-        const term = normStr(r['utm_term'] || '');
-        const code = normAdCode(term);
-        const k = (code && adCodeToName[code]) || term;
+        // utm_term trae el ID numérico del anuncio (ej: "808.363.232.557,00")
+        // Limpiar formato numérico español → "808363232557"
+        const rawId = normStr(r['utm_term'] || '').replace(/\./g, '').replace(/,\d*$/, '');
+        const k = adIdToName[rawId] || null;
         if (!k) return;
         byLeads[k] = (byLeads[k] || 0) + 1;
         return;
