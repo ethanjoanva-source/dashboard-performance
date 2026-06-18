@@ -436,8 +436,8 @@ async function fetchVentasByFuente() {
       const vals = Object.values(row);
       const f = (vals[0] || '').trim().toLowerCase();
       const count = parseInt(vals[1] || 0) || 0;
-      const cash  = parseNum(vals[2] || 0);
-      const fact  = parseNum(vals[3] || 0);
+      const cash  = parseFloat(vals[2] || 0) || 0;  // GViz devuelve punto decimal inglés
+      const fact  = parseFloat(vals[3] || 0) || 0;
       let cat;
       if (f === 'fb' || f.startsWith('facebook'))              cat = 'Facebook';
       else if (f === 'ig' || f.startsWith('instagram'))        cat = 'Instagram';
