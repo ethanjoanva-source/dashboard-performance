@@ -611,6 +611,7 @@ function buildRows(dim, leads, ventas, meta, youtube) {
 
   // Ventas
   if (cfg.ventKey) {
+    if (dim === 'fuente' && ventas.length > 0) console.log('[DBG] ventas[0] keys+Fuente:', Object.keys(ventas[0]).slice(20,26), '| Fuente=', ventas[0]['Fuente'], '| row:', JSON.stringify(ventas[0]).substring(0,300));
     ventas.forEach(r => {
       let k;
       if (dim === 'fuente') {
