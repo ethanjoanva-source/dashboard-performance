@@ -1134,6 +1134,16 @@ function dateKey(d) {
     String(d.getUTCDate()).padStart(2, '0');
 }
 
+// Parsea M/D/YYYY o M/DD/YYYY (mes primero, formato US del sheet compradores)
+function parseMDY(val) {
+  if (!val) return null;
+  const m = String(val).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!m) return null;
+  const mo = parseInt(m[1]), day = parseInt(m[2]), yr = parseInt(m[3]);
+  if (mo < 1 || mo > 12 || day < 1 || day > 31) return null;
+  return new Date(Date.UTC(yr, mo - 1, day));
+}
+
 function renderVentasPorDiaChart(comp) {
   if (ventasDiaChart) { try { ventasDiaChart.destroy(); } catch(e) {} ventasDiaChart = null; }
   const canvas = document.getElementById('chVentasDia');
@@ -1141,7 +1151,8 @@ function renderVentasPorDiaChart(comp) {
 
   const byDate = {};
   comp.forEach(r => {
-    const d = parseDate(findFechaValue(r));
+    const raw = findFechaValue(r);
+    const d = parseMDY(raw) || parseDate(raw);
     if (!d) return;
     const key = dateKey(d);
     byDate[key] = (byDate[key] || 0) + 1;
@@ -1151,7 +1162,7 @@ function renderVentasPorDiaChart(comp) {
   if (!dates.length) { canvas.parentElement.parentElement.style.display = 'none'; return; }
   canvas.parentElement.parentElement.style.display = '';
 
-  const labels = dates.map(d => { const [y, m, day] = d.split('-'); return `${day}/${m}`; });
+  const labels = dates.map(d => { const [y, m, day] = d.split('-'); return `${day}/${m}/${y}`; });
   const data   = dates.map(d => byDate[d]);
 
   const ctx = canvas.getContext('2d');
