@@ -399,9 +399,9 @@ function colLetter(idx) {
   return r;
 }
 
-// Extrae el código AD (ej. "AD2") de un nombre de anuncio o utm_term
+// Extrae el código AD (ej. "AD2", "MIXAD1") de un nombre de anuncio o utm_term
 function normAdCode(s) {
-  const m = (s || '').trim().match(/^(AD\d+)/i);
+  const m = (s || '').trim().match(/^((?:MIX)?AD\d+)/i);
   return m ? m[1].toUpperCase() : null;
 }
 
@@ -1012,7 +1012,8 @@ function buildRows(dim, leads, ventas, meta, youtube) {
     ...Object.keys(bySpend),
   ])].filter(k => {
     if (!k || isTemplate(k) || k === 'Sin atribuir') return false;
-    if (dim === 'adMeta' || dim === 'adYt') return !!bySpend[k];
+    if (dim === 'adMeta') return !!bySpend[k] || (byLeads[k] || 0) > 0;
+    if (dim === 'adYt') return !!bySpend[k];
     // En vista País con filtro activo, excluir "Otros" (países no rastreados sin inversión)
     if (dim === 'pais' && activePaisFuente !== 'all' && k === 'Otros') return false;
     return true;
