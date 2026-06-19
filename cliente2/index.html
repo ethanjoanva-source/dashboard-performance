@@ -137,6 +137,13 @@
       border-color: var(--accent-cyan); color: #fff;
       box-shadow: 0 0 10px rgba(34,211,238,0.2);
     }
+    .btn-fuente-meta { border-color: rgba(139,92,246,0.4); color: var(--accent-purple); }
+    .btn-fuente-meta:hover { border-color: var(--accent-purple); }
+    .btn-fuente-meta.active {
+      background: linear-gradient(135deg, rgba(139,92,246,0.4), rgba(99,102,241,0.3));
+      border-color: var(--accent-purple); color: #fff;
+      box-shadow: 0 0 10px rgba(139,92,246,0.25);
+    }
     .btn-tab {
       background: rgba(255,255,255,0.04); border: 1px solid var(--card-border);
       color: var(--text-muted); padding: 7px 18px; border-radius: 24px;
@@ -301,16 +308,19 @@
   <div class="tab-bar">
     <button class="btn-tab active" data-dim="fuente">Fuente</button>
     <button class="btn-tab" data-dim="pais">País</button>
+    <button class="btn-tab" data-dim="campaña">Campaña</button>
+    <button class="btn-tab" data-dim="adset">Grupo de anuncios</button>
     <button class="btn-tab" data-dim="adMeta">Ad Meta</button>
     <button class="btn-tab" data-dim="adYt">Ad YouTube</button>
   </div>
   <div class="fuente-filter-bar" id="fuenteFilterBar">
     <button class="btn-fuente active" data-fuente="all">Todas</button>
-    <button class="btn-fuente" data-fuente="YouTube">YouTube</button>
-    <button class="btn-fuente" data-fuente="Instagram">Instagram</button>
+    <button class="btn-fuente btn-fuente-meta" data-fuente="Meta">Meta</button>
     <button class="btn-fuente" data-fuente="Facebook">Facebook</button>
+    <button class="btn-fuente" data-fuente="Instagram">Instagram</button>
+    <button class="btn-fuente" data-fuente="YouTube">YouTube</button>
     <button class="btn-fuente" data-fuente="Orgánico">Orgánico</button>
-    <button class="btn-fuente" data-fuente="Afiliado">Afiliado</button>
+    <button class="btn-fuente" data-fuente="Afiliado" id="btnFuenteAfiliado">Afiliado</button>
   </div>
   <div class="table-wrap">
     <table id="mainTable">
@@ -714,11 +724,20 @@ function filterYoutube() {
 // ── DIM CONFIG ───────────────────────────────────────────────────────────────
 // skipMeta: no sumar gasto de meta | skipYt: no sumar gasto de youtube
 const DIM_CONFIG = {
-  fuente: { label: 'Fuente',     leadKey: 'utm_source', ventKey: 'Fuente',    metaKey: 'Plataforma',         ytKey: null,                   skipMeta: false, skipYt: false },
-  pais:   { label: 'País',       leadKey: 'Pais',       ventKey: 'País',      metaKey: null,                 ytKey: 'Pais',                 skipMeta: true,  skipYt: false },
-  adMeta: { label: 'Ad Meta',    leadKey: 'utm_term',   ventKey: 'Ad',        metaKey: 'Nombre del anuncio', ytKey: null,                   skipMeta: false, skipYt: true  },
-  adYt:   { label: 'Ad YouTube', leadKey: 'utm_term',   ventKey: 'Ad',        metaKey: null,                 ytKey: 'Nombre del anuncio',   skipMeta: true,  skipYt: false },
+  fuente:  { label: 'Fuente',              leadKey: 'utm_source',   ventKey: 'Fuente',                          metaKey: 'Plataforma',                         ytKey: null,                   skipMeta: false, skipYt: false },
+  pais:    { label: 'País',                leadKey: 'Pais',         ventKey: 'País',                            metaKey: null,                                 ytKey: 'Pais',                 skipMeta: true,  skipYt: false },
+  campaña: { label: 'Campaña',             leadKey: 'utm_campaign', ventKey: 'Campaña',                         metaKey: 'Nombre de la campaña',               ytKey: 'Campaña',              skipMeta: false, skipYt: false },
+  adset:   { label: 'Grupo de anuncios',   leadKey: 'utm_content',  ventKey: 'Conjunto de anuncios',            metaKey: 'Nombre del conjunto de anuncios',     ytKey: 'Grupo de anuncios',    skipMeta: false, skipYt: false },
+  adMeta:  { label: 'Ad Meta',             leadKey: 'utm_term',     ventKey: 'Ad',                              metaKey: 'Nombre del anuncio',                 ytKey: null,                   skipMeta: false, skipYt: true  },
+  adYt:    { label: 'Ad YouTube',          leadKey: 'utm_term',     ventKey: 'Ad',                              metaKey: null,                                 ytKey: 'Nombre del anuncio',   skipMeta: true,  skipYt: false },
 };
+
+// Filtra fuente incluyendo "Meta" = Facebook + Instagram
+function fuenteMatch(normFuente, filter) {
+  if (!filter || filter === 'all') return true;
+  if (filter === 'Meta') return normFuente === 'Facebook' || normFuente === 'Instagram';
+  return normFuente === filter;
+}
 
 // Categorías en Fuente: Facebook | Instagram | YouTube | Orgánico | Afiliado | Desconocido
 const FUENTE_NORM = {
@@ -866,9 +885,9 @@ function buildRows(dim, leads, ventas, meta, youtube) {
         byLeads[k] = (byLeads[k] || 0) + 1;
         return;
       }
-      if (dim === 'pais' && activePaisFuente !== 'all') {
+      if ((dim === 'pais' || dim === 'campaña' || dim === 'adset') && activePaisFuente !== 'all') {
         const fNorm = FUENTE_NORM[normStr(r['utm_source'] || '').toLowerCase()];
-        if (fNorm !== activePaisFuente) return;
+        if (!fuenteMatch(fNorm, activePaisFuente)) return;
       }
       const k = destPais(normKey(dim, normStr(r[cfg.leadKey])) || 'Sin atribuir');
       byLeads[k] = (byLeads[k] || 0) + 1;
@@ -895,7 +914,7 @@ function buildRows(dim, leads, ventas, meta, youtube) {
         Object.entries(rawVentPaisFuente).forEach(([pais, fuenteMap]) => {
           const dest = destPais(pais);
           Object.entries(fuenteMap).forEach(([fuente, data]) => {
-            if (fuente !== activePaisFuente) return;
+            if (!fuenteMatch(fuente, activePaisFuente)) return;
             if (!byVent[dest]) byVent[dest] = { ventas: 0, cash: 0, fact: 0 };
             byVent[dest].ventas += data.ventas;
             byVent[dest].cash  += data.cash;
@@ -925,6 +944,10 @@ function buildRows(dim, leads, ventas, meta, youtube) {
       });
     } else {
       ventas.forEach(r => {
+        if ((dim === 'campaña' || dim === 'adset') && activePaisFuente !== 'all') {
+          const fNorm = FUENTE_NORM[normStr(r['Fuente'] || '').toLowerCase()];
+          if (!fuenteMatch(fNorm, activePaisFuente)) return;
+        }
         const k = normKey(dim, normStr(r[cfg.ventKey])) || 'Sin atribuir';
         if (!byVent[k]) byVent[k] = { ventas: 0, cash: 0, fact: 0 };
         byVent[k].ventas++;
@@ -940,7 +963,7 @@ function buildRows(dim, leads, ventas, meta, youtube) {
       let spend;
       if (activePaisFuente === 'YouTube') {
         spend = data.ytSpend;
-      } else if (activePaisFuente === 'Facebook' || activePaisFuente === 'Instagram') {
+      } else if (activePaisFuente === 'Facebook' || activePaisFuente === 'Instagram' || activePaisFuente === 'Meta') {
         spend = data.metaSpend;
       } else if (activePaisFuente === 'all') {
         spend = data.metaSpend + data.ytSpend;
@@ -951,8 +974,16 @@ function buildRows(dim, leads, ventas, meta, youtube) {
     });
   }
 
+  // Para campaña/adset: decide qué plataformas incluir según filtro de fuente
+  const inclMeta = dim !== 'campaña' && dim !== 'adset'
+    ? true
+    : (activePaisFuente === 'all' || activePaisFuente === 'Meta' || activePaisFuente === 'Facebook' || activePaisFuente === 'Instagram');
+  const inclYt = dim !== 'campaña' && dim !== 'adset'
+    ? true
+    : (activePaisFuente === 'all' || activePaisFuente === 'YouTube');
+
   // Meta spend (si no está bloqueado y tiene metaKey) — no aplica a pais
-  if (dim !== 'pais' && !cfg.skipMeta && cfg.metaKey) {
+  if (dim !== 'pais' && !cfg.skipMeta && cfg.metaKey && inclMeta) {
     meta.forEach(r => {
       const k = normKey(dim, normStr(r[cfg.metaKey])) || 'Sin atribuir';
       bySpend[k] = (bySpend[k] || 0) + metaSpend(r);
@@ -960,7 +991,7 @@ function buildRows(dim, leads, ventas, meta, youtube) {
   }
 
   // YouTube spend (si no está bloqueado) — no aplica a pais
-  if (dim !== 'pais' && !cfg.skipYt) {
+  if (dim !== 'pais' && !cfg.skipYt && inclYt) {
     youtube.forEach(r => {
       let k;
       if (dim === 'fuente') {
@@ -1545,8 +1576,13 @@ document.querySelectorAll('.btn-tab').forEach(btn => {
     activeDim = btn.dataset.dim;
     sortCol = 'leads'; sortDir = 'desc';
     const fbar = document.getElementById('fuenteFilterBar');
-    if (activeDim === 'pais') {
+    const dimsConFuente = ['pais', 'campaña', 'adset'];
+    if (dimsConFuente.includes(activeDim)) {
       fbar.classList.add('visible');
+      activePaisFuente = 'all';
+      document.querySelectorAll('.btn-fuente').forEach(b => b.classList.toggle('active', b.dataset.fuente === 'all'));
+      // Afiliado solo aplica a País
+      document.getElementById('btnFuenteAfiliado').style.display = activeDim === 'pais' ? '' : 'none';
     } else {
       fbar.classList.remove('visible');
       activePaisFuente = 'all';
