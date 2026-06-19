@@ -1121,6 +1121,19 @@ async function loadData() {
 // ── VENTAS POR DÍA ────────────────────────────────────────────────────────
 let ventasDiaChart = null;
 
+function findFechaValue(r) {
+  const explicit = r['Fecha'] || r['fecha'] || r['Fecha de compra'] || r['FECHA'] || r['Date'] || r['date'];
+  if (explicit) return String(explicit).trim();
+  const k = Object.keys(r).find(k => k.toLowerCase().includes('fecha') || k.toLowerCase() === 'date');
+  return k ? String(r[k] || '').trim() : '';
+}
+
+function dateKey(d) {
+  return d.getUTCFullYear() + '-' +
+    String(d.getUTCMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getUTCDate()).padStart(2, '0');
+}
+
 function renderVentasPorDiaChart(comp) {
   if (ventasDiaChart) { try { ventasDiaChart.destroy(); } catch(e) {} ventasDiaChart = null; }
   const canvas = document.getElementById('chVentasDia');
@@ -1128,9 +1141,9 @@ function renderVentasPorDiaChart(comp) {
 
   const byDate = {};
   comp.forEach(r => {
-    const d = parseDate(r['Fecha'] || r['fecha'] || '');
+    const d = parseDate(findFechaValue(r));
     if (!d) return;
-    const key = d.toISOString().slice(0, 10);
+    const key = dateKey(d);
     byDate[key] = (byDate[key] || 0) + 1;
   });
 
