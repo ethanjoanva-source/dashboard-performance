@@ -308,7 +308,7 @@
   <div class="tab-bar">
     <button class="btn-tab active" data-dim="fuente">Fuente</button>
     <button class="btn-tab" data-dim="pais">País</button>
-    <button class="btn-tab" data-dim="campaña">Campaña</button>
+    <button class="btn-tab" data-dim="campana">Campaña</button>
     <button class="btn-tab" data-dim="adset">Grupo de anuncios</button>
     <button class="btn-tab" data-dim="adMeta">Ad Meta</button>
     <button class="btn-tab" data-dim="adYt">Ad YouTube</button>
@@ -726,7 +726,7 @@ function filterYoutube() {
 const DIM_CONFIG = {
   fuente:  { label: 'Fuente',              leadKey: 'utm_source',   ventKey: 'Fuente',                          metaKey: 'Plataforma',                         ytKey: null,                   skipMeta: false, skipYt: false },
   pais:    { label: 'País',                leadKey: 'Pais',         ventKey: 'País',                            metaKey: null,                                 ytKey: 'Pais',                 skipMeta: true,  skipYt: false },
-  campaña: { label: 'Campaña',             leadKey: 'utm_campaign', ventKey: 'Campaña',                         metaKey: 'Nombre de la campaña',               ytKey: 'Campaña',              skipMeta: false, skipYt: false },
+  campana: { label: 'Campaña',             leadKey: 'utm_campaign', ventKey: 'Campaña',                         metaKey: 'Nombre de la campaña',               ytKey: 'Campaña',              skipMeta: false, skipYt: false },
   adset:   { label: 'Grupo de anuncios',   leadKey: 'utm_content',  ventKey: 'Conjunto de anuncios',            metaKey: 'Nombre del conjunto de anuncios',     ytKey: 'Grupo de anuncios',    skipMeta: false, skipYt: false },
   adMeta:  { label: 'Ad Meta',             leadKey: 'utm_term',     ventKey: 'Ad',                              metaKey: 'Nombre del anuncio',                 ytKey: null,                   skipMeta: false, skipYt: true  },
   adYt:    { label: 'Ad YouTube',          leadKey: 'utm_term',     ventKey: 'Ad',                              metaKey: null,                                 ytKey: 'Nombre del anuncio',   skipMeta: true,  skipYt: false },
@@ -885,7 +885,7 @@ function buildRows(dim, leads, ventas, meta, youtube) {
         byLeads[k] = (byLeads[k] || 0) + 1;
         return;
       }
-      if ((dim === 'pais' || dim === 'campaña' || dim === 'adset') && activePaisFuente !== 'all') {
+      if ((dim === 'pais' || dim === 'campana' || dim === 'adset') && activePaisFuente !== 'all') {
         const fNorm = FUENTE_NORM[normStr(r['utm_source'] || '').toLowerCase()];
         if (!fuenteMatch(fNorm, activePaisFuente)) return;
       }
@@ -944,7 +944,7 @@ function buildRows(dim, leads, ventas, meta, youtube) {
       });
     } else {
       ventas.forEach(r => {
-        if ((dim === 'campaña' || dim === 'adset') && activePaisFuente !== 'all') {
+        if ((dim === 'campana' || dim === 'adset') && activePaisFuente !== 'all') {
           const fNorm = FUENTE_NORM[normStr(r['Fuente'] || '').toLowerCase()];
           if (!fuenteMatch(fNorm, activePaisFuente)) return;
         }
@@ -975,10 +975,10 @@ function buildRows(dim, leads, ventas, meta, youtube) {
   }
 
   // Para campaña/adset: decide qué plataformas incluir según filtro de fuente
-  const inclMeta = dim !== 'campaña' && dim !== 'adset'
+  const inclMeta = dim !== 'campana' && dim !== 'adset'
     ? true
     : (activePaisFuente === 'all' || activePaisFuente === 'Meta' || activePaisFuente === 'Facebook' || activePaisFuente === 'Instagram');
-  const inclYt = dim !== 'campaña' && dim !== 'adset'
+  const inclYt = dim !== 'campana' && dim !== 'adset'
     ? true
     : (activePaisFuente === 'all' || activePaisFuente === 'YouTube');
 
@@ -1578,7 +1578,7 @@ document.querySelectorAll('.btn-tab').forEach(btn => {
     activeDim = btn.dataset.dim;
     sortCol = 'leads'; sortDir = 'desc';
     const fbar = document.getElementById('fuenteFilterBar');
-    const dimsConFuente = ['pais', 'campaña', 'adset'];
+    const dimsConFuente = ['pais', 'campana', 'adset'];
     if (dimsConFuente.includes(activeDim)) {
       fbar.classList.add('visible');
       activePaisFuente = 'all';
