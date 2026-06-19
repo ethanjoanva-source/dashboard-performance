@@ -340,6 +340,13 @@
 <div class="charts-section">
   <div class="charts-section-title">Desglose visual</div>
   <div class="charts-grid" id="chartsGrid"></div>
+  <div class="charts-section-title" style="margin-top:28px;">Ventas por día</div>
+  <div class="chart-card" style="width:100%;">
+    <div class="chart-card-title">Ventas diarias</div>
+    <div class="chart-canvas-wrap" style="height:280px;">
+      <canvas id="chVentasDia"></canvas>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1033,6 +1040,7 @@ function render() {
   const displayLeads = (activeDim === 'adMeta' || activeDim === 'adYt') ? rows.reduce((s, r) => s + r.leads, 0) : totalLeads;
   renderTable(rows, displayLeads, totalVentas, totalInv, totalCash, totalFact);
   renderCharts(rows);
+  renderVentasPorDiaChart(ventas);
 }
 
 // ── TABLE RENDER ────────────────────────────────────────────────────────
@@ -1389,6 +1397,85 @@ async function loadData() {
   } finally {
     document.getElementById('loadingOverlay').style.display = 'none';
   }
+}
+
+// ── VENTAS POR DÍA ────────────────────────────────────────────────────────
+let ventasDiaChart = null;
+
+function renderVentasPorDiaChart(ventas) {
+  if (ventasDiaChart) { try { ventasDiaChart.destroy(); } catch(e) {} ventasDiaChart = null; }
+  const canvas = document.getElementById('chVentasDia');
+  if (!canvas) return;
+
+  const byDate = {};
+  ventas.forEach(r => {
+    const d = parseDate(r['Fecha de compra'] || '');
+    if (!d) return;
+    const key = d.toISOString().slice(0, 10);
+    byDate[key] = (byDate[key] || 0) + 1;
+  });
+
+  const dates = Object.keys(byDate).sort();
+  if (!dates.length) { canvas.parentElement.parentElement.style.display = 'none'; return; }
+  canvas.parentElement.parentElement.style.display = '';
+
+  const labels = dates.map(d => { const [y, m, day] = d.split('-'); return `${day}/${m}`; });
+  const data   = dates.map(d => byDate[d]);
+
+  const ctx = canvas.getContext('2d');
+  const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+  gradient.addColorStop(0, 'rgba(236,72,153,0.45)');
+  gradient.addColorStop(1, 'rgba(236,72,153,0.01)');
+
+  ventasDiaChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Ventas',
+        data,
+        borderColor: '#ec4899',
+        backgroundColor: gradient,
+        borderWidth: 2.5,
+        pointBackgroundColor: '#ec4899',
+        pointBorderColor: '#07071a',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 8,
+        fill: true,
+        tension: 0.35,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(10,8,30,0.95)',
+          borderColor: 'rgba(180,77,255,0.5)',
+          borderWidth: 1,
+          titleColor: '#c4b5fd',
+          bodyColor: '#e2e8f0',
+          padding: 12,
+          cornerRadius: 10,
+          callbacks: { label: c => `  Ventas: ${c.raw}` }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(180,77,255,0.07)' },
+          ticks: { color: '#6b7ab0', font: { size: 10 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 22 }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(180,77,255,0.07)' },
+          ticks: { color: '#6b7ab0', font: { size: 10 }, stepSize: 1, precision: 0 }
+        }
+      }
+    }
+  });
 }
 
 // ── EVENTS ────────────────────────────────────────────────────────────────
