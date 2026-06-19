@@ -1013,6 +1013,8 @@ function buildRows(dim, leads, ventas, meta, youtube) {
   ])].filter(k => {
     if (!k || isTemplate(k) || k === 'Sin atribuir') return false;
     if (dim === 'adMeta' || dim === 'adYt') return !!bySpend[k];
+    // En vista País con filtro activo, excluir "Otros" (países no rastreados sin inversión)
+    if (dim === 'pais' && activePaisFuente !== 'all' && k === 'Otros') return false;
     return true;
   });
 
