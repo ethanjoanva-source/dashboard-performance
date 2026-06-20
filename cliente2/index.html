@@ -865,13 +865,11 @@ function buildRows(dim, leads, ventas, meta, youtube) {
   if (cfg.leadKey) {
     leads.forEach(r => {
       if (dim === 'adMeta') {
-        // Columna G de la hoja leads = Plataforma; filtrar por 'Meta'
-        const colG = String(Object.values(r)[6] || '').trim().toLowerCase();
-        if (!colG.includes('meta')) return;
-        const term = normStr(r['utm_term'] || '');
-        const code = normAdCode(term);
-        const k = (code && adCodeToName[code]) || term;
-        if (!k) return;
+        // Columna G de la hoja leads contiene el código del anuncio (ej: "AD2", "AD3")
+        const colG = String(Object.values(r)[6] || '').trim();
+        const code = normAdCode(colG);
+        if (!code) return;
+        const k = adCodeToName[code] || colG;
         byLeads[k] = (byLeads[k] || 0) + 1;
         return;
       }
