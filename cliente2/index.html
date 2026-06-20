@@ -866,7 +866,8 @@ function buildRows(dim, leads, ventas, meta, youtube) {
     leads.forEach(r => {
       if (dim === 'adMeta') {
         const src = normStr(r['utm_source'] || '').toLowerCase();
-        if (src !== 'fb' && src !== 'ig' && !src.startsWith('facebook') && !src.startsWith('instagram')) return;
+        const fNorm = FUENTE_NORM[src];
+        if (fNorm !== 'Facebook' && fNorm !== 'Instagram') return;
         const term = normStr(r['utm_term'] || '');
         const code = normAdCode(term);
         const k = (code && adCodeToName[code]) || term;
