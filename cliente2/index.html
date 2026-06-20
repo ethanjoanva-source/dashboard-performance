@@ -865,9 +865,9 @@ function buildRows(dim, leads, ventas, meta, youtube) {
   if (cfg.leadKey) {
     leads.forEach(r => {
       if (dim === 'adMeta') {
-        const src = normStr(r['utm_source'] || '').toLowerCase();
-        const fNorm = FUENTE_NORM[src];
-        if (fNorm !== 'Facebook' && fNorm !== 'Instagram') return;
+        // Plataforma está en columna G de la hoja leads
+        const platRaw = r['Plataforma'] || r['plataforma'] || r['Platform'] || Object.values(r)[6] || '';
+        if (!String(platRaw).trim().toLowerCase().includes('meta')) return;
         const term = normStr(r['utm_term'] || '');
         const code = normAdCode(term);
         const k = (code && adCodeToName[code]) || term;
